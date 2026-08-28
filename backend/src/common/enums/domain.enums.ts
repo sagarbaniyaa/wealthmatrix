@@ -1,0 +1,94 @@
+// Mirrors the Postgres enum types 1:1 — keep in sync with the schema.
+
+export enum EntityType {
+  COMPANY = 'company',
+  SPV = 'spv',
+  TRUST = 'trust',
+  PARTNERSHIP = 'partnership',
+  HOLDING_COMPANY = 'holding_company',
+  FOUNDATION = 'foundation',
+}
+
+export enum AssetClass {
+  CASH = 'cash',
+  EQUITY_PUBLIC = 'equity_public',
+  EQUITY_PRIVATE = 'equity_private',
+  FIXED_INCOME = 'fixed_income',
+  PROPERTY = 'property',
+  PENSION = 'pension',
+  PRIVATE_EQUITY_FUND = 'private_equity_fund',
+  DEBT_INSTRUMENT = 'debt_instrument',
+  OTHER = 'other',
+}
+
+export enum AccountType {
+  BANK = 'bank',
+  INVESTMENT = 'investment',
+  PENSION = 'pension',
+  LOAN = 'loan',
+  CUSTODY = 'custody',
+  OTHER = 'other',
+}
+
+export enum TransactionType {
+  BUY = 'buy',
+  SELL = 'sell',
+  DEPOSIT = 'deposit',
+  WITHDRAWAL = 'withdrawal',
+  DIVIDEND = 'dividend',
+  INTEREST = 'interest',
+  FEE = 'fee',
+  TRANSFER = 'transfer',
+  VALUATION_ADJUSTMENT = 'valuation_adjustment',
+  DISTRIBUTION = 'distribution',
+}
+
+export enum ScenarioEventType {
+  BUSINESS_SALE = 'business_sale',
+  INHERITANCE = 'inheritance',
+  RELOCATION = 'relocation',
+  DIVORCE = 'divorce',
+  TAX_RESIDENCY_CHANGE = 'tax_residency_change',
+  PROPERTY_SALE = 'property_sale',
+  LIQUIDITY_EVENT = 'liquidity_event',
+  PE_EXIT = 'pe_exit',
+  DIVIDEND_RECAP = 'dividend_recap',
+  LEVERAGE_CHANGE = 'leverage_change',
+  CUSTOM = 'custom',
+}
+
+export enum ComplianceSeverity {
+  INFO = 'info',
+  WARNING = 'warning',
+  BREACH = 'breach',
+}
+
+// Provider Automation Hub
+export enum ClientDocumentType {
+  LOA = 'LOA',
+  FACT_FIND = 'FACT_FIND',
+  KYC = 'KYC',
+  ID_PROOF = 'ID_PROOF',
+  ADDRESS_PROOF = 'ADDRESS_PROOF',
+  BANK_STATEMENT = 'BANK_STATEMENT',
+  POLICY_SUMMARY = 'POLICY_SUMMARY',
+  ADVISER_DETAILS = 'ADVISER_DETAILS',
+}
+
+// Docs the adviser must actually upload themselves — we can't legitimately
+// synthesize an ID document or bank statement. FACT_FIND, POLICY_SUMMARY
+// and ADVISER_DETAILS are generated on the fly from data already in the
+// database instead (see DocumentGeneratorService).
+export const UPLOADABLE_DOCUMENT_TYPES = [
+  ClientDocumentType.KYC,
+  ClientDocumentType.ID_PROOF,
+  ClientDocumentType.ADDRESS_PROOF,
+  ClientDocumentType.BANK_STATEMENT,
+] as const;
+
+export enum ProviderActionStatus {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  RECEIVED = 'RECEIVED',
+  FAILED = 'FAILED',
+}

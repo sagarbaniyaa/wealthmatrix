@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-ink-950 text-ink-100 font-sans antialiased;
+}
+
+/* All monetary/percentage figures use tabular mono numerals so columns of
+   figures align — a small detail that matters a great deal on a wealth
+   dashboard where advisers scan numbers vertically. */
+.figure {
+  @apply font-mono tabular-nums;
+}
+
+.hairline {
+  @apply border-hairline;
+}
+
+/* Signature element: entity/person nodes styled like a wax ledger seal —
+   a double ring, evoking the formality of trust/entity documentation —
+   used consistently in EntityStructureGraph and nowhere else, so it reads
+   as intentional rather than decorative. */
+.ledger-seal {
+  filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+:focus-visible {
+  outline: 2px solid #D2A94F;
+  outline-offset: 2px;
+}
+
+/* Lets an in-app page (e.g. /client/reports) print cleanly without the
+   sidebar chrome — the standalone /print/* pages don't need this since
+   they never render inside the sidebar layout to begin with. */
+@media print {
+  aside { display: none; }
+}

@@ -1,0 +1,12 @@
+NODE_ENV=development
+PORT=3000
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=wealthmatrix_app
+DB_PASSWORD=changeme
+DB_DATABASE=wealthmatrix
+# IMPORTANT: this DB role must NOT have BYPASSRLS — see schema notes.
+
+JWT_SECRET=changeme-use-a-long-random-secret
+JWT_EXPIRES_IN=8h
