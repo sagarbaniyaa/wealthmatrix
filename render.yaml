@@ -1,0 +1,71 @@
+databases:
+  - name: wealthmatrix-db
+    plan: free
+    databaseName: wealthmatrix
+    user: wealthmatrix
+
+services:
+  - type: web
+    name: wealthmatrix-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase: { name: wealthmatrix-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: wealthmatrix-db, property: port }
+      - key: DB_USERNAME
+        fromDatabase: { name: wealthmatrix-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: wealthmatrix-db, property: password }
+      - key: DB_DATABASE
+        fromDatabase: { name: wealthmatrix-db, property: database }
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 8h
+      # Set these two in the Render dashboard after the blueprint deploys
+      # (never commit a real key) — the AI features degrade gracefully
+      # without one, so it's fine to leave blank at first.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5
+      # Provider Automation Hub email — leave unset to skip sending;
+      # "Send to Provider" still works and logs FAILED with a clear reason.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: FUND_DATA_SOURCE_URL
+        sync: false
+
+  - type: web
+    name: wealthmatrix-frontend
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set this in the dashboard once the backend service has deployed
+      # and you have its URL, e.g. https://wealthmatrix-backend.onrender.com
+      # (no trailing slash). Render's cross-service URL templating isn't
+      # reliable enough across blueprint versions to hardcode here.
+      - key: BACKEND_API_URL
+        sync: false

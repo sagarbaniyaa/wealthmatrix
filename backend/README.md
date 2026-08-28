@@ -97,12 +97,20 @@ is the load-bearing piece of this backend — read
 ```bash
 cp .env.example .env   # fill in DB + JWT_SECRET
 npm install
-# apply wealthmatrix_schema.sql to the target database first
+# Fresh database: restore db/full_dump.sql (schema + fictional demo data),
+# a pg_dump of the working local database — there is no standalone base
+# schema.sql in this repo; migrations/002 onward are incremental on top
+# of what full_dump.sql already contains.
+psql "$DATABASE_URL" -f db/full_dump.sql
 npm run start:dev
 ```
 
-The runtime DB role in `DB_USERNAME` **must not** have `BYPASSRLS` — see the
-schema's Section 10 notes.
+The runtime DB role in `DB_USERNAME` **must not** have `BYPASSRLS`. Every
+RLS-protected table in this schema uses `FORCE ROW LEVEL SECURITY`, so a
+plain (non-superuser) database-owner role — e.g. what a managed Postgres
+provider hands you by default — is enforced correctly without needing a
+second, more-restricted role. See DEPLOYMENT.md at the repo root for a
+full guide to deploying this to Render.
 
 ## Known gaps / next steps
 
