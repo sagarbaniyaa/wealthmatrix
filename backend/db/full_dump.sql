@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 7OwUqtcg9f8XkdTFN17C2OtWfavx1uhU1DvomBVsm3uJW49JYQmC5bQFBcseVSo
+\restrict l8uTrex6LgEB5glOYVGKXkaODXQY6IWiQv7d2It8Y48dR9sWqzVKYRDhqDPHLqd
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -766,6 +766,52 @@ ALTER TABLE ONLY public.provider FORCE ROW LEVEL SECURITY;
 
 
 --
+-- Name: report_case; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.report_case (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    household_id uuid NOT NULL,
+    report_template_id uuid NOT NULL,
+    report_template_version integer,
+    report_type text NOT NULL,
+    case_details jsonb DEFAULT '{}'::jsonb NOT NULL,
+    content text,
+    status text DEFAULT 'draft'::text NOT NULL,
+    generation_error text,
+    created_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.report_case FORCE ROW LEVEL SECURITY;
+
+
+--
+-- Name: report_template; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.report_template (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    name text NOT NULL,
+    report_type text NOT NULL,
+    file_name text NOT NULL,
+    mime_type text NOT NULL,
+    file_data bytea NOT NULL,
+    extracted_text text NOT NULL,
+    version integer DEFAULT 1 NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    uploaded_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.report_template FORCE ROW LEVEL SECURITY;
+
+
+--
 -- Name: risk_exposure; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1090,6 +1136,14 @@ fd82b025-62ca-4bd2-8cfe-00766d346c3b	524e600b-d62d-469d-b697-22ced0fbcc07	person
 d675e272-a8e0-425d-a6b7-749bec85f2d5	524e600b-d62d-469d-b697-22ced0fbcc07	fact_find	da687407-2dda-4e0b-a3af-1112af368145	DELETE	3579ddda-bee0-490a-9a68-6a15424a667a	{"id": "da687407-2dda-4e0b-a3af-1112af368145", "assets": {"notes": "", "pensions": [], "nonPension": []}, "status": "completed", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "insurance": {"notes": "", "whyNot": "", "policies": [], "hasLifeInsurance": false}, "signed_on": null, "created_at": "2026-08-28T13:51:42.713943+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "risk_score": 87.50, "updated_at": "2026-08-28T13:55:39.120538+01:00", "declaration": {"fullName": "", "infoAccurate": false, "termsAccepted": false, "completionMethod": "face_to_face"}, "liabilities": {"items": [], "notes": ""}, "completed_on": "2026-08-28", "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "risk_capacity": {"assessmentBasis": "personal", "netWorthExclHome": "", "withdrawalHorizon": "", "monthlyDisposableIncome": ""}, "risk_category": "aggressive", "review_purposes": {"selected": [], "reviewNotes": "", "otherDetails": ""}, "income_expenditure": {"client": {"notes": "", "sources": [], "taxStatus": "basic_rate", "expenditure": [], "employmentStatus": "employed"}, "partner": {"notes": "", "sources": [], "taxStatus": "basic_rate", "expenditure": [], "employmentStatus": "employed"}}, "risk_questionnaire": [{"questionKey": "general_risk_appetite", "selectedOption": "E"}, {"questionKey": "market_knowledge", "selectedOption": "E"}, {"questionKey": "accept_losses_for_returns", "selectedOption": "E"}, {"questionKey": "prioritise_preservation", "selectedOption": "E"}, {"questionKey": "horizon_stability", "selectedOption": "E"}, {"questionKey": "income_growth_expectation", "selectedOption": "E"}, {"questionKey": "loss_reaction", "selectedOption": "E"}, {"questionKey": "investment_priority", "selectedOption": "E"}], "investment_questions": {"notes": "", "lumpSumWhen": "", "lumpSumSource": "", "prefersActive": false, "expectsLumpSum": false, "lastReviewDate": "", "prefersPassive": false, "withdrawalType": "", "withdrawalWhen": "", "hasOtherAdvisor": false, "withdrawalAmount": "", "withdrawalIntends": false, "otherAdvisorDetails": "", "specialRequirements": "", "investmentObjectives": "", "reflectsRiskAppetite": "not_sure"}, "retirement_questions": {"reasoning": "", "selfYearsWorked": "", "pensionIntention": "not_sure", "partnerYearsWorked": "", "selfExpectedAmount": "", "selfFullStatePension": true, "partnerExpectedAmount": "", "partnerFullStatePension": true, "minMonthlyIncomeRequirement": ""}, "personal_circumstances": {"isPEP": false, "smoker": false, "hasWill": false, "dependents": [], "partnerDOB": "", "partnerSex": "", "poaDetails": "", "partnerName": "", "healthStatus": "good", "healthExplain": "", "maritalStatus": "single", "poaOverAffairs": false, "partnerOccupation": "", "vulnerabilityNotes": "", "affectsUnderstanding": false, "needsAdditionalSupport": false, "additionalSupportDetails": "", "additionalSupportProvided": "", "spouseCommunicationConsent": false, "affectsUnderstandingDetails": ""}}	\N	2026-08-28 13:56:36.961445+01
 5126c7dc-1250-4996-a712-c1fbfbc1cc64	524e600b-d62d-469d-b697-22ced0fbcc07	person	ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c	UPDATE	\N	{"id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c", "city": "London", "email": "alexandra.sterling@example.com", "phone": "+44 20 7946 0958", "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Sterling", "ni_number": "QQ123456C", "created_at": "2026-08-26T16:26:55.770432+01:00", "first_name": "Alexandra", "kyc_status": "verified", "updated_at": "2026-08-28T13:55:39.120538+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": "aggressive", "kyc_verified_at": null, "source_of_wealth": "Sale of family business"}	{"id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c", "city": "London", "email": "alexandra.sterling@example.com", "phone": "+44 20 7946 0958", "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Sterling", "ni_number": "QQ123456C", "created_at": "2026-08-26T16:26:55.770432+01:00", "first_name": "Alexandra", "kyc_status": "verified", "updated_at": "2026-08-28T13:56:46.483566+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": "moderate", "kyc_verified_at": null, "source_of_wealth": "Sale of family business"}	2026-08-28 13:56:46.483566+01
 bd33bd33-436a-422e-bf58-d24cd6658a14	524e600b-d62d-469d-b697-22ced0fbcc07	compliance_log	2b757d56-d9a7-42f7-af7e-bb80e0a2b787	UPDATE	3579ddda-bee0-490a-9a68-6a15424a667a	{"id": "2b757d56-d9a7-42f7-af7e-bb80e0a2b787", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "KYC refresh overdue - last verified over 12 months ago", "metadata": {}, "severity": "breach", "entity_id": null, "rule_code": "KYC_REFRESH_OVERDUE", "detected_at": "2026-08-27T14:19:23.110845+01:00", "resolved_at": null, "resolved_by": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814"}	{"id": "2b757d56-d9a7-42f7-af7e-bb80e0a2b787", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "KYC refresh overdue - last verified over 12 months ago", "metadata": {}, "severity": "breach", "entity_id": null, "rule_code": "KYC_REFRESH_OVERDUE", "detected_at": "2026-08-27T14:19:23.110845+01:00", "resolved_at": "2026-08-28T14:19:05.129+01:00", "resolved_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814"}	2026-08-28 14:19:05.12895+01
+a7c285fb-aa76-404b-933f-b1ac27bfbfa4	524e600b-d62d-469d-b697-22ced0fbcc07	compliance_log	0c03c2fb-b707-4335-818b-b70ab2f5b7cc	INSERT	3579ddda-bee0-490a-9a68-6a15424a667a	\N	{"id": "0c03c2fb-b707-4335-818b-b70ab2f5b7cc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "Sterling Family holds 97.25% of its portfolio in a single asset, exceeding the 50% concentration threshold.", "metadata": {}, "severity": "breach", "entity_id": null, "rule_code": "CONCENTRATION_BREACH", "detected_at": "2026-09-01T10:03:50.572891+01:00", "resolved_at": null, "resolved_by": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814"}	2026-09-01 10:03:50.572891+01
+d5770dde-25ed-45ff-818b-48c4976f017c	524e600b-d62d-469d-b697-22ced0fbcc07	report_template	f0ae0c34-9234-44f5-86af-55d38812df52	INSERT	3579ddda-bee0-490a-9a68-6a15424a667a	\N	{"id": "f0ae0c34-9234-44f5-86af-55d38812df52", "name": "Standard Pension Transfer", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "version": 1, "file_data": "\\\\x504b03040a00000000003153215d179800d7b2010000b2010000130000005b436f6e74656e745f54797065735d2e786d6c3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d3822207374616e64616c6f6e653d22796573223f3e0a3c547970657320786d6c6e733d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f7061636b6167652f323030362f636f6e74656e742d7479706573223e0a3c44656661756c7420457874656e73696f6e3d2272656c732220436f6e74656e74547970653d226170706c69636174696f6e2f766e642e6f70656e786d6c666f726d6174732d7061636b6167652e72656c6174696f6e73686970732b786d6c222f3e0a3c44656661756c7420457874656e73696f6e3d22786d6c2220436f6e74656e74547970653d226170706c69636174696f6e2f786d6c222f3e0a3c4f7665727269646520506172744e616d653d222f776f72642f646f63756d656e742e786d6c2220436f6e74656e74547970653d226170706c69636174696f6e2f766e642e6f70656e786d6c666f726d6174732d6f6666696365646f63756d656e742e776f726470726f63657373696e676d6c2e646f63756d656e742e6d61696e2b786d6c222f3e0a3c2f54797065733e504b03040a00000000003153215d3fadfefa2c0100002c0100000b0000005f72656c732f2e72656c733c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d3822207374616e64616c6f6e653d22796573223f3e0a3c52656c6174696f6e736869707320786d6c6e733d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f7061636b6167652f323030362f72656c6174696f6e7368697073223e0a3c52656c6174696f6e736869702049643d22724964312220547970653d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f6f6666696365446f63756d656e742f323030362f72656c6174696f6e73686970732f6f6666696365446f63756d656e7422205461726765743d22776f72642f646f63756d656e742e786d6c222f3e0a3c2f52656c6174696f6e73686970733e504b03040a00000000003153215d1b58a5ffc8070000c807000011000000776f72642f646f63756d656e742e786d6c3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d3822207374616e64616c6f6e653d22796573223f3e0a3c773a646f63756d656e7420786d6c6e733a773d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f776f726470726f63657373696e676d6c2f323030362f6d61696e223e0a3c773a626f64793e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e50454e53494f4e205452414e5346455220535549544142494c495459205245504f52543c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e507265706172656420666f723a204a616e652053616d706c6520436c69656e743c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e446174653a2031204a616e7561727920323032353c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e232320526561736f6e7320666f722074686973207265766965773c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e596f752061736b656420757320746f2072657669657720796f7572206578697374696e672070656e73696f6e20617272616e67656d656e74732068656c642077697468204f6c642050726f7669646572204c74642c20666f6c6c6f77696e672061206368616e676520696e20796f75722063697263756d7374616e6365732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e232320596f75722063757272656e7420617272616e67656d656e743c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e596f7572206578697374696e672070656e73696f6e2069732068656c642077697468204f6c642050726f7669646572204c74642c2076616c75656420617420617070726f78696d6174656c79203130302c303030206173206174207468652072657669657720646174652e2054686520706c616e206361727269657320616e20616e6e75616c206d616e6167656d656e7420636861726765206f6620312e3230252e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e2323205265636f6d6d656e646174696f6e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e5765207265636f6d6d656e64207472616e7366657272696e6720796f75722070656e73696f6e20746f204e65772050726f7669646572204c74642c207768696368206f666665727320612077696465722066756e642072616e676520616e642061206c6f77657220616e6e75616c20636861726765206f6620302e3435252e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e2323205269736b73206f66207472616e7366657272696e673c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e596f752077696c6c206c6f736520616e792067756172616e7465657320617474616368656420746f20796f7572206578697374696e6720706c616e2e205472616e736665722076616c7565732063616e20676f20646f776e2061732077656c6c206173207570206265666f726520746865207472616e7366657220636f6d706c657465732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e232320436f7374733c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e5468657265206973206e6f20657869742070656e616c7479206f6e20796f7572206578697374696e6720706c616e2e20546865206e657720706c616e206368617267657320302e34352520706572207965617220706c75732066756e64206d616e6167657220636861726765732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e2323204e6578742073746570733c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e496620796f752061726520686170707920746f2070726f636565642c20706c65617365207369676e20616e642072657475726e2074686520656e636c6f736564204c6574746572206f6620417574686f7269747920736f2077652063616e20626567696e20746865207472616e736665722070726f636573732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a7365637450722f3e0a3c2f773a626f64793e0a3c2f773a646f63756d656e743e504b010214000a00000000003153215d179800d7b2010000b20100001300000000000000000000000000000000005b436f6e74656e745f54797065735d2e786d6c504b010214000a00000000003153215d3fadfefa2c0100002c0100000b00000000000000000000000000e30100005f72656c732f2e72656c73504b010214000a00000000003153215d1b58a5ffc8070000c8070000110000000000000000000000000038030000776f72642f646f63756d656e742e786d6c504b05060000000003000300b90000002f0b00000000", "file_name": "test-report-template.docx", "is_active": true, "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "created_at": "2026-09-01T10:26:03.844672+01:00", "updated_at": "2026-09-01T10:26:03.844672+01:00", "report_type": "pension_transfer", "uploaded_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "extracted_text": "PENSION TRANSFER SUITABILITY REPORT\\n\\nPrepared for: Jane Sample Client\\n\\nDate: 1 January 2025\\n\\n## Reasons for this review\\n\\nYou asked us to review your existing pension arrangements held with Old Provider Ltd, following a change in your circumstances.\\n\\n## Your current arrangement\\n\\nYour existing pension is held with Old Provider Ltd, valued at approximately 100,000 as at the review date. The plan carries an annual management charge of 1.20%.\\n\\n## Recommendation\\n\\nWe recommend transferring your pension to New Provider Ltd, which offers a wider fund range and a lower annual charge of 0.45%.\\n\\n## Risks of transferring\\n\\nYou will lose any guarantees attached to your existing plan. Transfer values can go down as well as up before the transfer completes.\\n\\n## Costs\\n\\nThere is no exit penalty on your existing plan. The new plan charges 0.45% per year plus fund manager charges.\\n\\n## Next steps\\n\\nIf you are happy to proceed, please sign and return the enclosed Letter of Authority so we can begin the transfer process."}	2026-09-01 10:26:03.844672+01
+c6f89dac-77c4-4ec1-a2ea-55bed7f2f2a5	524e600b-d62d-469d-b697-22ced0fbcc07	report_case	dcc437fe-5689-4502-b884-77fb5b8f179e	INSERT	3579ddda-bee0-490a-9a68-6a15424a667a	\N	{"id": "dcc437fe-5689-4502-b884-77fb5b8f179e", "status": "draft", "content": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-01T10:26:26.673918+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T10:26:26.673918+01:00", "report_type": "pension_transfer", "case_details": {"facts": [{"label": "Transfer value", "value": "�150,000"}, {"label": "From provider", "value": "Aviva"}, {"label": "To provider", "value": "Fidelity"}], "summary": "Pension transfer from Aviva to Fidelity for better fund range and lower charges"}, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "generation_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account.", "report_template_id": "f0ae0c34-9234-44f5-86af-55d38812df52", "report_template_version": 1}	2026-09-01 10:26:26.673918+01
+8b397923-7478-4d99-9000-884759f255b3	524e600b-d62d-469d-b697-22ced0fbcc07	report_template	0ed1276a-16d9-46a2-8603-b39abd32b3e6	INSERT	3579ddda-bee0-490a-9a68-6a15424a667a	\N	{"id": "0ed1276a-16d9-46a2-8603-b39abd32b3e6", "name": "Standard ISA Setup", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "version": 1, "file_data": "\\\\x255044462d312e370a25818181810a0a362030206f626a0a3c3c0a2f46696c746572202f466c6174654465636f64650a2f4c656e677468203335390a3e3e0a73747265616d0a789ca5534d4bc43010bde757e42c8893e97c05c4c376b778f022f40f88a8287a58117fbf33c91694a5b262a79424f391f7e64df7693327c861ef4fe9e2fae1f5f3e1e3f9feee5ca11a19a8d55c30cf8f0929cf37a9b4d09219b21ae4f92d5d52e5810a827f99fd6588b52f2b131542aa34c69aab9fa307004d8c4c57797e49f359dacde936edd77054251443165bc5211dc769f510000cb89aacd6a35e0f0737472c2c45079964a7be1791491141494c6a9c6844847febc6b213f278921a19a772f49e88b747573161c7c45e55b9dd3ec928e42b6e18967395e238a94774aff0e20fdce1f708e72423c2a25decdca69e2f2de71bd3a286c12d9eeade1a3ce3165167ef59d10d3c916de0e061905f1480bf286ac4500cca7af7c48e14fd975e263e3f5a4c5767520e33c9daba7f7463743cfe92a6e3209b3659a57b385a5322274e17855c99dabadc32059b6207ad5abdad6b3a060f57cae735746f0a89f61b7f72fb023a24dce70a656e6473747265616d0a656e646f626a0a0a372030206f626a0a3c3c0a2f46696c746572202f466c6174654465636f64650a2f54797065202f4f626a53746d0a2f4e20350a2f46697273742032360a2f4c656e677468203431380a3e3e0a73747265616d0a789cd5534d6bdc3010bdeb57ccb139148d657d966561b36b27504242526848c8c1b1c5e210a4626b4bfaef3bb2771342b6e45ccc60cdbcf7461a69a6000401524209c68204550a50a00b098b05e33ffefcf2c0af9aad1f19ffde7723dc138a700d0f8cafe32e2428d872c9deb8eb2635cf71cb661114997c605c0db1dbb57e80455dd535a241442dc934a2d8d07f4de6c804f984094b6b3223f746315322962bc2ead9b49935199fb86aafafe84f5c9d399b992bedecbfee9bf7aae61ce2b3f3b825e317b1db34c9c397cd378142a3c3029d3068ee4ee83a06dfa4f8ff16379dbf8fe19f15be7be73a86c4f8cdee314d6e0e168c9f36a3cf08f073fffcdba7be6d18af421bbb3e6c81ffecc32a8cfd21f03e636e98dc3683cf5d35f50dbff663dc0d2d3552e64d99f3e235f95783ce52e5c63aeadd49f286392385b64269fb11cb2f605139ab8fe9144aed049a8f985146a8b2d4c774562a2c2c5dd8119dd5b49729ac399c854ae7b7978f4fbe9d4aca6ef592ce6e52befd39906317beeb9bd3f8427387f429a7c04a91a76f15424c791ea7490c896e2d7b7a3f9d24fe0b9f15f0d10a656e6473747265616d0a656e646f626a0a0a382030206f626a0a3c3c0a2f53697a6520390a2f526f6f742032203020520a2f496e666f2033203020520a2f46696c746572202f466c6174654465636f64650a2f54797065202f585265660a2f4c656e6774682034310a2f57205b203120322032205d0a2f496e646578205b20302039205d0a3e3e0a73747265616d0a789c15c4b11100300803b137709736fb4f4399ad085621602638e0e4c2a52b7141ea2d1f7c620703d50a656e6473747265616d0a656e646f626a0a0a7374617274787265660a3936380a2525454f46", "file_name": "test-report-template.pdf", "is_active": true, "mime_type": "application/pdf", "created_at": "2026-09-01T10:27:24.537047+01:00", "updated_at": "2026-09-01T10:27:24.537047+01:00", "report_type": "isa_setup", "uploaded_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "extracted_text": "ISA SETUP SUITABILITY REPORT\\n## Reasons for this recommendation\\nYou told us you want to use your annual ISA allowance for tax-efficient growth.\\n## Recommendation\\nWe recommend a Stocks and Shares ISA with a balanced multi-asset fund.\\n\\n-- 1 of 1 --"}	2026-09-01 10:27:24.537047+01
+96851b9f-24f6-40ee-8af4-4adc16ccb7f7	524e600b-d62d-469d-b697-22ced0fbcc07	report_case	dcc437fe-5689-4502-b884-77fb5b8f179e	UPDATE	3579ddda-bee0-490a-9a68-6a15424a667a	{"id": "dcc437fe-5689-4502-b884-77fb5b8f179e", "status": "draft", "content": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-01T10:26:26.673918+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T10:26:26.673918+01:00", "report_type": "pension_transfer", "case_details": {"facts": [{"label": "Transfer value", "value": "�150,000"}, {"label": "From provider", "value": "Aviva"}, {"label": "To provider", "value": "Fidelity"}], "summary": "Pension transfer from Aviva to Fidelity for better fund range and lower charges"}, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "generation_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account.", "report_template_id": "f0ae0c34-9234-44f5-86af-55d38812df52", "report_template_version": 1}	{"id": "dcc437fe-5689-4502-b884-77fb5b8f179e", "status": "final", "content": "## Reasons for this review\\nManually drafted content since AI is unavailable.\\n\\n## Recommendation\\nTransfer to Fidelity as discussed.", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-01T10:26:26.673918+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T10:28:37.448477+01:00", "report_type": "pension_transfer", "case_details": {"facts": [{"label": "Transfer value", "value": "�150,000"}, {"label": "From provider", "value": "Aviva"}, {"label": "To provider", "value": "Fidelity"}], "summary": "Pension transfer from Aviva to Fidelity for better fund range and lower charges"}, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "generation_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account.", "report_template_id": "f0ae0c34-9234-44f5-86af-55d38812df52", "report_template_version": 1}	2026-09-01 10:28:37.448477+01
+47096491-ce33-40fa-bc11-ab9dbdcabe73	524e600b-d62d-469d-b697-22ced0fbcc07	report_case	dcc437fe-5689-4502-b884-77fb5b8f179e	DELETE	\N	{"id": "dcc437fe-5689-4502-b884-77fb5b8f179e", "status": "final", "content": "## Reasons for this review\\nManually drafted content since AI is unavailable.\\n\\n## Recommendation\\nTransfer to Fidelity as discussed.", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-01T10:26:26.673918+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T10:28:37.448477+01:00", "report_type": "pension_transfer", "case_details": {"facts": [{"label": "Transfer value", "value": "�150,000"}, {"label": "From provider", "value": "Aviva"}, {"label": "To provider", "value": "Fidelity"}], "summary": "Pension transfer from Aviva to Fidelity for better fund range and lower charges"}, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "generation_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account.", "report_template_id": "f0ae0c34-9234-44f5-86af-55d38812df52", "report_template_version": 1}	\N	2026-09-01 10:30:49.533163+01
+6bac1d72-53d3-4003-a556-4d1ba15c4831	524e600b-d62d-469d-b697-22ced0fbcc07	report_template	f0ae0c34-9234-44f5-86af-55d38812df52	DELETE	\N	{"id": "f0ae0c34-9234-44f5-86af-55d38812df52", "name": "Standard Pension Transfer", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "version": 1, "file_data": "\\\\x504b03040a00000000003153215d179800d7b2010000b2010000130000005b436f6e74656e745f54797065735d2e786d6c3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d3822207374616e64616c6f6e653d22796573223f3e0a3c547970657320786d6c6e733d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f7061636b6167652f323030362f636f6e74656e742d7479706573223e0a3c44656661756c7420457874656e73696f6e3d2272656c732220436f6e74656e74547970653d226170706c69636174696f6e2f766e642e6f70656e786d6c666f726d6174732d7061636b6167652e72656c6174696f6e73686970732b786d6c222f3e0a3c44656661756c7420457874656e73696f6e3d22786d6c2220436f6e74656e74547970653d226170706c69636174696f6e2f786d6c222f3e0a3c4f7665727269646520506172744e616d653d222f776f72642f646f63756d656e742e786d6c2220436f6e74656e74547970653d226170706c69636174696f6e2f766e642e6f70656e786d6c666f726d6174732d6f6666696365646f63756d656e742e776f726470726f63657373696e676d6c2e646f63756d656e742e6d61696e2b786d6c222f3e0a3c2f54797065733e504b03040a00000000003153215d3fadfefa2c0100002c0100000b0000005f72656c732f2e72656c733c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d3822207374616e64616c6f6e653d22796573223f3e0a3c52656c6174696f6e736869707320786d6c6e733d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f7061636b6167652f323030362f72656c6174696f6e7368697073223e0a3c52656c6174696f6e736869702049643d22724964312220547970653d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f6f6666696365446f63756d656e742f323030362f72656c6174696f6e73686970732f6f6666696365446f63756d656e7422205461726765743d22776f72642f646f63756d656e742e786d6c222f3e0a3c2f52656c6174696f6e73686970733e504b03040a00000000003153215d1b58a5ffc8070000c807000011000000776f72642f646f63756d656e742e786d6c3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d3822207374616e64616c6f6e653d22796573223f3e0a3c773a646f63756d656e7420786d6c6e733a773d22687474703a2f2f736368656d61732e6f70656e786d6c666f726d6174732e6f72672f776f726470726f63657373696e676d6c2f323030362f6d61696e223e0a3c773a626f64793e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e50454e53494f4e205452414e5346455220535549544142494c495459205245504f52543c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e507265706172656420666f723a204a616e652053616d706c6520436c69656e743c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e446174653a2031204a616e7561727920323032353c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e232320526561736f6e7320666f722074686973207265766965773c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e596f752061736b656420757320746f2072657669657720796f7572206578697374696e672070656e73696f6e20617272616e67656d656e74732068656c642077697468204f6c642050726f7669646572204c74642c20666f6c6c6f77696e672061206368616e676520696e20796f75722063697263756d7374616e6365732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e232320596f75722063757272656e7420617272616e67656d656e743c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e596f7572206578697374696e672070656e73696f6e2069732068656c642077697468204f6c642050726f7669646572204c74642c2076616c75656420617420617070726f78696d6174656c79203130302c303030206173206174207468652072657669657720646174652e2054686520706c616e206361727269657320616e20616e6e75616c206d616e6167656d656e7420636861726765206f6620312e3230252e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e2323205265636f6d6d656e646174696f6e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e5765207265636f6d6d656e64207472616e7366657272696e6720796f75722070656e73696f6e20746f204e65772050726f7669646572204c74642c207768696368206f666665727320612077696465722066756e642072616e676520616e642061206c6f77657220616e6e75616c20636861726765206f6620302e3435252e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e2323205269736b73206f66207472616e7366657272696e673c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e596f752077696c6c206c6f736520616e792067756172616e7465657320617474616368656420746f20796f7572206578697374696e6720706c616e2e205472616e736665722076616c7565732063616e20676f20646f776e2061732077656c6c206173207570206265666f726520746865207472616e7366657220636f6d706c657465732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e232320436f7374733c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e5468657265206973206e6f20657869742070656e616c7479206f6e20796f7572206578697374696e6720706c616e2e20546865206e657720706c616e206368617267657320302e34352520706572207965617220706c75732066756e64206d616e6167657220636861726765732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e2323204e6578742073746570733c2f773a743e3c2f773a723e3c2f773a703e0a3c773a703e3c773a723e3c773a7420786d6c3a73706163653d227072657365727665223e496620796f752061726520686170707920746f2070726f636565642c20706c65617365207369676e20616e642072657475726e2074686520656e636c6f736564204c6574746572206f6620417574686f7269747920736f2077652063616e20626567696e20746865207472616e736665722070726f636573732e3c2f773a743e3c2f773a723e3c2f773a703e0a3c773a7365637450722f3e0a3c2f773a626f64793e0a3c2f773a646f63756d656e743e504b010214000a00000000003153215d179800d7b2010000b20100001300000000000000000000000000000000005b436f6e74656e745f54797065735d2e786d6c504b010214000a00000000003153215d3fadfefa2c0100002c0100000b00000000000000000000000000e30100005f72656c732f2e72656c73504b010214000a00000000003153215d1b58a5ffc8070000c8070000110000000000000000000000000038030000776f72642f646f63756d656e742e786d6c504b05060000000003000300b90000002f0b00000000", "file_name": "test-report-template.docx", "is_active": true, "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "created_at": "2026-09-01T10:26:03.844672+01:00", "updated_at": "2026-09-01T10:26:03.844672+01:00", "report_type": "pension_transfer", "uploaded_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "extracted_text": "PENSION TRANSFER SUITABILITY REPORT\\n\\nPrepared for: Jane Sample Client\\n\\nDate: 1 January 2025\\n\\n## Reasons for this review\\n\\nYou asked us to review your existing pension arrangements held with Old Provider Ltd, following a change in your circumstances.\\n\\n## Your current arrangement\\n\\nYour existing pension is held with Old Provider Ltd, valued at approximately 100,000 as at the review date. The plan carries an annual management charge of 1.20%.\\n\\n## Recommendation\\n\\nWe recommend transferring your pension to New Provider Ltd, which offers a wider fund range and a lower annual charge of 0.45%.\\n\\n## Risks of transferring\\n\\nYou will lose any guarantees attached to your existing plan. Transfer values can go down as well as up before the transfer completes.\\n\\n## Costs\\n\\nThere is no exit penalty on your existing plan. The new plan charges 0.45% per year plus fund manager charges.\\n\\n## Next steps\\n\\nIf you are happy to proceed, please sign and return the enclosed Letter of Authority so we can begin the transfer process."}	\N	2026-09-01 10:30:49.544121+01
+a4985228-929c-4d6b-a7a3-8f1fabf64efb	524e600b-d62d-469d-b697-22ced0fbcc07	report_template	0ed1276a-16d9-46a2-8603-b39abd32b3e6	DELETE	\N	{"id": "0ed1276a-16d9-46a2-8603-b39abd32b3e6", "name": "Standard ISA Setup", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "version": 1, "file_data": "\\\\x255044462d312e370a25818181810a0a362030206f626a0a3c3c0a2f46696c746572202f466c6174654465636f64650a2f4c656e677468203335390a3e3e0a73747265616d0a789ca5534d4bc43010bde757e42c8893e97c05c4c376b778f022f40f88a8287a58117fbf33c91694a5b262a79424f391f7e64df7693327c861ef4fe9e2fae1f5f3e1e3f9feee5ca11a19a8d55c30cf8f0929cf37a9b4d09219b21ae4f92d5d52e5810a827f99fd6588b52f2b131542aa34c69aab9fa307004d8c4c57797e49f359dacde936edd77054251443165bc5211dc769f510000cb89aacd6a35e0f0737472c2c45079964a7be1791491141494c6a9c6844847febc6b213f278921a19a772f49e88b747573161c7c45e55b9dd3ec928e42b6e18967395e238a94774aff0e20fdce1f708e72423c2a25decdca69e2f2de71bd3a286c12d9eeade1a3ce3165167ef59d10d3c916de0e061905f1480bf286ac4500cca7af7c48e14fd975e263e3f5a4c5767520e33c9daba7f7463743cfe92a6e3209b3659a57b385a5322274e17855c99dabadc32059b6207ad5abdad6b3a060f57cae735746f0a89f61b7f72fb023a24dce70a656e6473747265616d0a656e646f626a0a0a372030206f626a0a3c3c0a2f46696c746572202f466c6174654465636f64650a2f54797065202f4f626a53746d0a2f4e20350a2f46697273742032360a2f4c656e677468203431380a3e3e0a73747265616d0a789cd5534d6bdc3010bdeb57ccb139148d657d966561b36b27504242526848c8c1b1c5e210a4626b4bfaef3bb2771342b6e45ccc60cdbcf7461a69a6000401524209c68204550a50a00b098b05e33ffefcf2c0af9aad1f19ffde7723dc138a700d0f8cafe32e2428d872c9deb8eb2635cf71cb661114997c605c0db1dbb57e80455dd535a241442dc934a2d8d07f4de6c804f984094b6b3223f746315322962bc2ead9b49935199fb86aafafe84f5c9d399b992bedecbfee9bf7aae61ce2b3f3b825e317b1db34c9c397cd378142a3c3029d3068ee4ee83a06dfa4f8ff16379dbf8fe19f15be7be73a86c4f8cdee314d6e0e168c9f36a3cf08f073fffcdba7be6d18af421bbb3e6c81ffecc32a8cfd21f03e636e98dc3683cf5d35f50dbff663dc0d2d3552e64d99f3e235f95783ce52e5c63aeadd49f286392385b64269fb11cb2f605139ab8fe9144aed049a8f985146a8b2d4c774562a2c2c5dd8119dd5b49729ac399c854ae7b7978f4fbe9d4aca6ef592ce6e52befd39906317beeb9bd3f8427387f429a7c04a91a76f15424c791ea7490c896e2d7b7a3f9d24fe0b9f15f0d10a656e6473747265616d0a656e646f626a0a0a382030206f626a0a3c3c0a2f53697a6520390a2f526f6f742032203020520a2f496e666f2033203020520a2f46696c746572202f466c6174654465636f64650a2f54797065202f585265660a2f4c656e6774682034310a2f57205b203120322032205d0a2f496e646578205b20302039205d0a3e3e0a73747265616d0a789c15c4b11100300803b137709736fb4f4399ad085621602638e0e4c2a52b7141ea2d1f7c620703d50a656e6473747265616d0a656e646f626a0a0a7374617274787265660a3936380a2525454f46", "file_name": "test-report-template.pdf", "is_active": true, "mime_type": "application/pdf", "created_at": "2026-09-01T10:27:24.537047+01:00", "updated_at": "2026-09-01T10:27:24.537047+01:00", "report_type": "isa_setup", "uploaded_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "extracted_text": "ISA SETUP SUITABILITY REPORT\\n## Reasons for this recommendation\\nYou told us you want to use your annual ISA allowance for tax-efficient growth.\\n## Recommendation\\nWe recommend a Stocks and Shares ISA with a balanced multi-asset fund.\\n\\n-- 1 of 1 --"}	\N	2026-09-01 10:30:49.544121+01
 \.
 
 
@@ -1117,6 +1171,7 @@ COPY public.client_note (id, firm_id, household_id, author_id, note, created_at)
 COPY public.compliance_log (id, firm_id, household_id, entity_id, severity, rule_code, message, detected_at, resolved_at, resolved_by, metadata) FROM stdin;
 783de73d-3aca-43cd-933a-f94763b285fc	524e600b-d62d-469d-b697-22ced0fbcc07	262061da-d7ca-4b2f-a435-0745d97dca4a	\N	warning	SUITABILITY_REVIEW_DUE	Annual suitability review due within 30 days	2026-08-27 14:19:23.110845+01	2026-08-27 15:56:13.396+01	3579ddda-bee0-490a-9a68-6a15424a667a	{}
 2b757d56-d9a7-42f7-af7e-bb80e0a2b787	524e600b-d62d-469d-b697-22ced0fbcc07	18889b89-2f36-4a30-aa55-d4fef82b3814	\N	breach	KYC_REFRESH_OVERDUE	KYC refresh overdue - last verified over 12 months ago	2026-08-27 14:19:23.110845+01	2026-08-28 14:19:05.129+01	3579ddda-bee0-490a-9a68-6a15424a667a	{}
+0c03c2fb-b707-4335-818b-b70ab2f5b7cc	524e600b-d62d-469d-b697-22ced0fbcc07	18889b89-2f36-4a30-aa55-d4fef82b3814	\N	breach	CONCENTRATION_BREACH	Sterling Family holds 97.25% of its portfolio in a single asset, exceeding the 50% concentration threshold.	2026-09-01 10:03:50.572891+01	\N	\N	{}
 \.
 
 
@@ -1363,6 +1418,22 @@ f1418831-1b19-4c6b-8824-5a865881b6c6	524e600b-d62d-469d-b697-22ced0fbcc07	Charle
 9e28b429-df96-4c46-b2b4-95f5a2247a81	524e600b-d62d-469d-b697-22ced0fbcc07	Nutmeg	loa@nutmeg.com	servicing@nutmeg.com	newbusiness@nutmeg.com	f	["LOA", "Client Fact Find", "KYC", "ID Proof", "Address Proof", "Bank Statements", "Policy Numbers (if available)"]	t	2026-08-28 11:52:53.544876+01	2026-08-28 11:52:53.544876+01
 32ab9e41-dc2b-4efc-bede-038029904a87	524e600b-d62d-469d-b697-22ced0fbcc07	Wealthify	loa@wealthify.com	servicing@wealthify.com	newbusiness@wealthify.com	f	["LOA", "Client Fact Find", "KYC", "ID Proof", "Address Proof", "Bank Statements", "Policy Numbers (if available)"]	t	2026-08-28 11:52:53.544876+01	2026-08-28 11:52:53.544876+01
 f99aaa0e-ab26-4e1d-a029-3b7927f8c285	524e600b-d62d-469d-b697-22ced0fbcc07	Quilter	loa@quilter.com	servicing@quilter.com	newbusiness@quilter.com	f	["LOA", "Client Fact Find", "KYC", "ID Proof", "Address Proof", "Bank Statements", "Policy Numbers (if available)"]	t	2026-08-28 11:52:53.544876+01	2026-08-28 12:13:49.986056+01
+\.
+
+
+--
+-- Data for Name: report_case; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.report_case (id, firm_id, household_id, report_template_id, report_template_version, report_type, case_details, content, status, generation_error, created_by, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: report_template; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.report_template (id, firm_id, name, report_type, file_name, mime_type, file_data, extracted_text, version, is_active, uploaded_by, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -1695,6 +1766,22 @@ ALTER TABLE ONLY public.provider
 
 ALTER TABLE ONLY public.provider
     ADD CONSTRAINT provider_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: report_case report_case_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_case
+    ADD CONSTRAINT report_case_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: report_template report_template_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_template
+    ADD CONSTRAINT report_template_pkey PRIMARY KEY (id);
 
 
 --
@@ -2039,6 +2126,34 @@ CREATE INDEX idx_provider_firm ON public.provider USING btree (firm_id);
 
 
 --
+-- Name: idx_report_case_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_report_case_firm ON public.report_case USING btree (firm_id);
+
+
+--
+-- Name: idx_report_case_household; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_report_case_household ON public.report_case USING btree (household_id);
+
+
+--
+-- Name: idx_report_template_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_report_template_firm ON public.report_template USING btree (firm_id);
+
+
+--
+-- Name: idx_report_template_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_report_template_type ON public.report_template USING btree (report_type);
+
+
+--
 -- Name: idx_risk_exposure_household_date; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2214,6 +2329,20 @@ CREATE TRIGGER trg_audit_provider AFTER INSERT OR DELETE OR UPDATE ON public.pro
 
 
 --
+-- Name: report_case trg_audit_report_case; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_audit_report_case AFTER INSERT OR DELETE OR UPDATE ON public.report_case FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
+
+
+--
+-- Name: report_template trg_audit_report_template; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_audit_report_template AFTER INSERT OR DELETE OR UPDATE ON public.report_template FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
+
+
+--
 -- Name: risk_exposure trg_audit_risk_exposure; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -2337,6 +2466,20 @@ CREATE TRIGGER trg_updated_at_person BEFORE UPDATE ON public.person FOR EACH ROW
 --
 
 CREATE TRIGGER trg_updated_at_provider BEFORE UPDATE ON public.provider FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: report_case trg_updated_at_report_case; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_updated_at_report_case BEFORE UPDATE ON public.report_case FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: report_template trg_updated_at_report_template; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_updated_at_report_template BEFORE UPDATE ON public.report_template FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -2883,6 +3026,54 @@ ALTER TABLE ONLY public.provider
 
 
 --
+-- Name: report_case report_case_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_case
+    ADD CONSTRAINT report_case_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.app_user(id);
+
+
+--
+-- Name: report_case report_case_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_case
+    ADD CONSTRAINT report_case_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: report_case report_case_household_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_case
+    ADD CONSTRAINT report_case_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
+
+
+--
+-- Name: report_case report_case_report_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_case
+    ADD CONSTRAINT report_case_report_template_id_fkey FOREIGN KEY (report_template_id) REFERENCES public.report_template(id);
+
+
+--
+-- Name: report_template report_template_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_template
+    ADD CONSTRAINT report_template_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: report_template report_template_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.report_template
+    ADD CONSTRAINT report_template_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.app_user(id);
+
+
+--
 -- Name: risk_exposure risk_exposure_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3123,6 +3314,18 @@ ALTER TABLE public.person ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.provider ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: report_case; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.report_case ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: report_template; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.report_template ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: risk_exposure; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -3309,6 +3512,20 @@ CREATE POLICY tenant_isolation_provider ON public.provider USING ((firm_id = (NU
 
 
 --
+-- Name: report_case tenant_isolation_report_case; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_report_case ON public.report_case USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
+-- Name: report_template tenant_isolation_report_template; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_report_template ON public.report_template USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
 -- Name: risk_exposure tenant_isolation_risk_exposure; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -3346,5 +3563,5 @@ ALTER TABLE public.transaction ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 7OwUqtcg9f8XkdTFN17C2OtWfavx1uhU1DvomBVsm3uJW49JYQmC5bQFBcseVSo
+\unrestrict l8uTrex6LgEB5glOYVGKXkaODXQY6IWiQv7d2It8Y48dR9sWqzVKYRDhqDPHLqd
 
