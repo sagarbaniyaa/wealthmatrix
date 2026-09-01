@@ -25,6 +25,7 @@ const CLIENT_LINKS = [
   { href: '/client/profile', label: 'Profile' },
   { href: '/client/income', label: 'Income' },
   { href: '/client/assets', label: 'Assets & liabilities' },
+  { href: '/client/look-through', label: 'What you really own' },
   { href: '/client/structure', label: 'Structure' },
   { href: '/client/notes', label: 'Notes & activity' },
   { href: '/client/reports', label: 'Reports' },

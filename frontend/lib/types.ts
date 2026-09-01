@@ -381,6 +381,25 @@ export interface FactFind {
   updatedAt: string;
 }
 
+// Portfolio Look-Through
+
+export interface LookThroughExposure { name: string; value: number; pct: number }
+export interface LookThroughHoldingDetail {
+  assetName: string;
+  value: number;
+  matchedFundId: string | null;
+  matchedFundName: string | null;
+  lookedThrough: boolean;
+}
+export interface PortfolioLookThroughResult {
+  totalValue: number;
+  lookedThroughValue: number;
+  lookedThroughPct: number;
+  topExposures: LookThroughExposure[];
+  assetClassBreakdown: LookThroughExposure[];
+  holdings: LookThroughHoldingDetail[];
+}
+
 // Client Journey Pipeline
 
 export type JourneyStepStatus = 'not_started' | 'in_progress' | 'done';

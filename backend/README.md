@@ -120,6 +120,13 @@ is the load-bearing piece of this backend — read
   declaration (those need the client's own direct answer, not an
   inference). See the frontend README's Meeting-to-Fact-Find AI section.
 
+- `modules/portfolio-lookthrough`, `services/portfolio-lookthrough` —
+  true underlying exposure across every fund a household holds, matching
+  held assets to `fund.isin` and weighting by that fund's own
+  `fund_holdings`/`fund_allocation`. Available to the client role too
+  (their own household only) — see the frontend README's Portfolio
+  Look-Through section for the matching logic and known simplifications.
+
 ## Running it
 
 ```bash

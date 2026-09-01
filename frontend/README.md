@@ -27,6 +27,8 @@ marketing site, an adviser/admin platform, and a client portal.
 /print/report-case/[id]                 The generated report, printable
 /advisor/households/[id]/projections    Pension/plan transfer charge & growth projection calculator
                                          (Client Journey tracker lives inline on the household page itself)
+/advisor/households/[id]/look-through   True underlying exposure across every fund held
+/client/look-through                    Same view, client-facing ("What you really own")
 /client/*             Client portal (was `/portal`)
 
 /print/*              Standalone print/export pages (no sidebar), each with a
@@ -364,6 +366,43 @@ liabilities, insurance, investment/retirement questions.
   form (only sections the AI actually returned anything for are
   touched) — it doesn't create a new fact find or wipe fields the
   adviser already typed in a section the notes didn't cover.
+
+### Portfolio Look-Through
+
+**`/advisor/households/[id]/look-through`** (and a client-facing
+`/client/look-through`, "What you really own") — true underlying
+exposure across every fund a household holds, not just a list of which
+funds they own.
+
+- **How the match works**: for each of a household's held assets
+  (`account` → `holding` → `asset`, scoped to accounts owned directly by
+  household members), `asset.identifier` is checked against `fund.isin`.
+  Where it matches, the holding's value is distributed across that
+  fund's own `fund_holdings` (top constituents) and `fund_allocation`
+  (asset-class weights) — e.g. a client's £50,000 in a fund that's 5%
+  Apple contributes £2,500 to their aggregate Apple exposure, combined
+  with Apple exposure from every *other* fund they hold and any Apple
+  shares they hold directly.
+- **Nothing is silently dropped**: an asset that doesn't match any
+  researched fund (a direct stock, cash, property, or a fund outside our
+  universe) still counts in full under its own name and its own
+  `asset.assetClass` — shown plainly as "Not matched" in the holdings
+  table rather than being excluded from the totals.
+- **`lookedThroughPct`** on the result tells you how much of the total
+  portfolio actually got broken down this way vs. shown at face value —
+  worth watching, since a low number means the picture is mostly
+  face-value holdings, not a real look-through yet (expected for
+  households whose assets predate the Fund Research Module, or that
+  don't hold researched funds at all).
+- **Known simplifications**: scoped to personally-owned accounts only
+  (entity-attributed holdings via a trust/company aren't included, unlike
+  `WealthConsolidationService`'s net-worth figure), and `fund_holdings`
+  in this schema is only ever a fund's *top* constituents — the
+  look-through covers what that data actually has, not 100% of every
+  matched fund's book.
+- Purely deterministic aggregation (`PortfolioLookThroughService`) — no
+  AI involved, computed fresh on every request like
+  `WealthConsolidationService.getHouseholdNetWorth`.
 
 ## Architecture
 
