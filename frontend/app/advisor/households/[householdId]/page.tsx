@@ -27,6 +27,9 @@ export default async function HouseholdDetailPage({ params }: { params: { househ
             <Link href={`/print/suitability/${household.id}`} target="_blank" className="text-sm text-brass-400 hover:text-brass-300">
               Suitability report →
             </Link>
+            <Link href={`/advisor/households/${household.id}/report-builder`} className="text-sm text-brass-400 hover:text-brass-300">
+              Report Builder →
+            </Link>
             <Link href={`/advisor/households/${household.id}/structure`} className="text-sm text-brass-400 hover:text-brass-300">
               View structure map →
             </Link>

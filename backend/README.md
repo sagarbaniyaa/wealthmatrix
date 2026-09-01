@@ -91,6 +91,14 @@ is the load-bearing piece of this backend — read
   risk metrics/fund suitability shortlist. See the frontend README's Fact
   Find + Suitability Report section for the full data model and the
   ATR scoring model's own scoring formula.
+- `modules/report-template`, `modules/report-case`, `services/report-builder`
+  — the Report Template Builder: upload a real example report per type
+  (ISA setup, pension transfer, crystallisation, open-ended list), extract
+  its text (`mammoth` for docx, `pdf-parse` for pdf), and generate new
+  reports of that type for a specific household from its fact find +
+  net worth + adviser-entered case details. See the frontend README's
+  Report Template Builder section for the generation prompt discipline
+  and the print page's heading-parsing approach.
 
 ## Running it
 

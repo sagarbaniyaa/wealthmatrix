@@ -9,6 +9,7 @@ const ADVISER_LINKS = [
   { href: '/advisor/compliance', label: 'Compliance' },
   { href: '/advisor/reports', label: 'Reports' },
   { href: '/advisor/providers', label: 'Providers' },
+  { href: '/advisor/report-templates', label: 'Report Templates' },
 ];
 
 const RESEARCH_LINKS = [

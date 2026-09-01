@@ -381,6 +381,41 @@ export interface FactFind {
   updatedAt: string;
 }
 
+// Report Template Builder
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  reportType: string;
+  fileName: string;
+  mimeType: string;
+  version: number;
+  isActive: boolean;
+  uploadedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReportCaseDetails {
+  summary: string;
+  facts: { label: string; value: string }[];
+}
+
+export interface ReportCase {
+  id: string;
+  householdId: string;
+  reportTemplateId: string;
+  reportTemplateVersion: number | null;
+  reportType: string;
+  caseDetails: ReportCaseDetails;
+  content: string | null;
+  status: 'draft' | 'final';
+  generationError: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SuitabilityReportContext {
   household: { id: string; name: string };
   factFind: FactFind | null;

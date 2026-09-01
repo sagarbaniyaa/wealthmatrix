@@ -36,6 +36,7 @@ import { ProviderModule } from './modules/provider/provider.module';
 import { ClientDocumentModule } from './modules/client-document/client-document.module';
 import { LoaTemplateModule } from './modules/loa-template/loa-template.module';
 import { FactFindModule } from './modules/fact-find/fact-find.module';
+import { ReportTemplateModule } from './modules/report-template/report-template.module';
 
 import { WealthConsolidationModule } from './services/wealth-consolidation/wealth-consolidation.module';
 import { EntityStructureModule } from './services/entity-structure/entity-structure.module';
@@ -43,6 +44,7 @@ import { ScenarioEngineModule } from './services/scenario-engine/scenario-engine
 import { AuditLogModule } from './services/audit-log/audit-log.module';
 import { FXConversionModule } from './services/fx-conversion/fx-conversion.module';
 import { ProviderHubModule } from './services/provider-hub/provider-hub.module';
+import { ReportBuilderModule } from './services/report-builder/report-builder.module';
 
 import { AiModule } from './ai/ai.module';
 
@@ -82,6 +84,7 @@ import { AiModule } from './ai/ai.module';
     ClientDocumentModule,
     LoaTemplateModule,
     FactFindModule,
+    ReportTemplateModule,
 
     WealthConsolidationModule,
     EntityStructureModule,
@@ -89,6 +92,7 @@ import { AiModule } from './ai/ai.module';
     AuditLogModule,
     FXConversionModule,
     ProviderHubModule,
+    ReportBuilderModule,
 
     AiModule,
   ],

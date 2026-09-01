@@ -22,6 +22,9 @@ marketing site, an adviser/admin platform, and a client portal.
 /advisor/households/[id]/provider-hub  Per-client LOA autofill, pack, one-click send
 /advisor/households/[id]/fact-find     Fact Find + Attitude-to-Risk questionnaire, versioned per review
 /print/suitability/[id]                AI-assisted Suitability Report draft
+/advisor/report-templates              Report Template Builder — upload real example reports per type
+/advisor/households/[id]/report-builder  Generate a new report of any uploaded type for this client
+/print/report-case/[id]                 The generated report, printable
 /client/*             Client portal (was `/portal`)
 
 /print/*              Standalone print/export pages (no sidebar), each with a
@@ -256,6 +259,48 @@ stand-in.
   fact find has been completed yet, the page says so plainly instead of
   generating a report from nothing.
 
+### Report Template Builder
+
+A different, more general mechanism than the single fixed Suitability
+Report above: the adviser uploads a **real example** of any report type
+their firm produces (ISA setup, pension transfer, crystallisation — the
+list is entirely open-ended, advisers introduce new types just by
+uploading one), and the platform drafts *new* reports of that same type
+for a specific client, in that same format, from that client's real data.
+
+- **`/advisor/report-templates`** — upload a `.docx` or `.pdf` example
+  report (`POST report-templates`, multipart). Text is extracted at
+  upload time (`mammoth` for docx, `pdf-parse` for pdf) and stored
+  alongside the original file — the extracted text is what actually goes
+  into the AI prompt as a structure/format reference; the file itself is
+  kept only so it can be re-downloaded. Same versioning convention as LOA
+  templates: re-uploading the same `name` bumps `version` and retires the
+  previous one.
+- **`/advisor/households/[id]/report-builder`** — pick an uploaded
+  template, describe the specific case in plain English (e.g. "Pension
+  transfer from Aviva to Fidelity — client wants a wider fund range and
+  lower charges") plus optional key-fact rows (transfer value, provider
+  names, etc.), and generate (`POST households/:id/report-cases`). The
+  household's latest **completed** fact find is pulled in automatically —
+  no need to re-type objectives or risk profile that already exist there.
+- **How generation actually works**: Claude is given the uploaded
+  template's extracted text as a reference, told explicitly that it shows
+  *format only* — no client-identifying detail from the reference (names,
+  amounts, dates) may appear in the output — plus the new household's
+  fact find summary, net worth, and the adviser's case description. It's
+  instructed to mirror the reference's section structure (marked with
+  `## Heading` lines) and write `[Not provided — adviser to complete]`
+  anywhere it would otherwise have to invent a fact. The result is always
+  editable before being marked final — a plain textarea, not a locked
+  document — and if the AI call fails (e.g. no Anthropic credits), the
+  case is still created with a clear `generationError` so the adviser can
+  write it manually rather than losing the case details they entered.
+- **`/print/report-case/[id]`** — the printable output. A small
+  line-by-line renderer turns `## Heading` lines into section headers and
+  everything else into paragraphs — deliberately not a full markdown
+  library, since this is the one constrained subset the AI is asked to
+  produce.
+
 ## Architecture
 
 **Token handling.** The backend issues a bearer JWT; this frontend never
@@ -404,6 +449,21 @@ npm run dev
   (name/DOB/sex/occupation), not as a linked Person/HouseholdMember, so a
   joint household's second applicant isn't queryable as their own record
   (same simplification noted for LOA autofill and Fund Suitability).
+- **`/print/report-case/[id]` needs `?householdId=` in the URL** — report
+  cases are only ever listed/fetched under `households/:householdId/
+  report-cases/:id`, and the print route has no way to resolve a bare
+  case ID back to its household on its own. `ReportBuilderClient` always
+  includes the query param when linking to this page, but a bookmarked
+  or hand-typed URL without it will bounce to the households list rather
+  than the report — a `report_case` lookup-by-id-only endpoint would be
+  the cleaner fix if this becomes annoying in practice.
+- **Report Template Builder's generated reports are single blobs of
+  text**, not a tree of section rows — editing happens in one plain
+  textarea, and the print page's heading detection is a deliberately thin
+  line-by-line parser (`## Heading` only), not real markdown. Fine for
+  what the AI is instructed to produce; would need a proper rich-text
+  editor and a real markdown renderer if reports need inline formatting
+  (bold, tables, bullet lists) beyond section headings and paragraphs.
 - **Fund → Household Impact's `WHERE id IN (...)` ordering bug applies
   more broadly than that one call site** — any future `IN (:...ids)`
   query whose caller relies on the result coming back in the same order
