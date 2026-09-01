@@ -31,3 +31,4 @@ export * from './compliance-provider-action.entity';
 export * from './fact-find.entity';
 export * from './report-template.entity';
 export * from './report-case.entity';
+export * from './charge-projection.entity';

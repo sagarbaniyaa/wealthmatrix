@@ -99,6 +99,13 @@ is the load-bearing piece of this backend — read
   net worth + adviser-entered case details. See the frontend README's
   Report Template Builder section for the generation prompt discipline
   and the print page's heading-parsing approach.
+- `modules/charge-projection`, `services/charge-projection` — pension/plan
+  transfer charge & growth projections. Both arrangements are manual
+  entry (a real transfer's "old" side is very often a legacy provider not
+  in our fund database); the year-by-year series is computed once and
+  stored, not recalculated per view. See the frontend README's
+  Pension/Plan Transfer Projections section for the "reduction in yield"
+  methodology.
 
 ## Running it
 

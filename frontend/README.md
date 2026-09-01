@@ -25,6 +25,7 @@ marketing site, an adviser/admin platform, and a client portal.
 /advisor/report-templates              Report Template Builder — upload real example reports per type
 /advisor/households/[id]/report-builder  Generate a new report of any uploaded type for this client
 /print/report-case/[id]                 The generated report, printable
+/advisor/households/[id]/projections    Pension/plan transfer charge & growth projection calculator
 /client/*             Client portal (was `/portal`)
 
 /print/*              Standalone print/export pages (no sidebar), each with a
@@ -300,6 +301,18 @@ for a specific client, in that same format, from that client's real data.
   everything else into paragraphs — deliberately not a full markdown
   library, since this is the one constrained subset the AI is asked to
   produce.
+
+### Pension/Plan Transfer Projections
+
+**`/advisor/households/[id]/projections`** — a charges-and-growth calculator, separate from (and simpler than) the Fund Research Module's Switch Impact tool: both the "old" and "new" arrangement are **manual entry** here, deliberately, because a real transfer very often involves a legacy insurance-company pension (Aviva, Standard Life, etc.) that will never be in our researched fund database — this tool doesn't assume either side is one of our funds.
+
+- Old arrangement: name, current value, ongoing charge %, exit penalty %.
+- New arrangement: name, ongoing charge %, initial charge % (reduces the amount that actually starts growing in the new plan).
+- Shared assumptions: projection term (years), one gross growth rate applied to **both** sides.
+- **Methodology**: standard "reduction in yield" style approach — since both arrangements compound at the *same* assumed gross rate before their own charges are deducted, 100% of the gap between the two projected curves is the charge difference, nothing else. `ChargeProjectionService.compute()` in the backend is the whole calculation, pure arithmetic, no AI involved in the numbers themselves.
+- The year-by-year series is **stored**, not recalculated on every view — if the formula is ever refined later, a projection a client has already been shown stays exactly reproducible.
+- An optional AI note (`ClaudeClientService`) explains the result in plain English — same non-recommending, numbers-already-computed discipline as every other AI feature here; it narrates, it doesn't judge suitability.
+- Rendered with a small original SVG line chart (`ChargeProjectionChart.tsx`) — no charting library, same convention as `FundPerformanceChart`.
 
 ## Architecture
 

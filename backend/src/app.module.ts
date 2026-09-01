@@ -45,6 +45,7 @@ import { AuditLogModule } from './services/audit-log/audit-log.module';
 import { FXConversionModule } from './services/fx-conversion/fx-conversion.module';
 import { ProviderHubModule } from './services/provider-hub/provider-hub.module';
 import { ReportBuilderModule } from './services/report-builder/report-builder.module';
+import { ChargeProjectionModule } from './services/charge-projection/charge-projection.module';
 
 import { AiModule } from './ai/ai.module';
 
@@ -93,6 +94,7 @@ import { AiModule } from './ai/ai.module';
     FXConversionModule,
     ProviderHubModule,
     ReportBuilderModule,
+    ChargeProjectionModule,
 
     AiModule,
   ],

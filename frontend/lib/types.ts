@@ -381,6 +381,36 @@ export interface FactFind {
   updatedAt: string;
 }
 
+// Pension/Plan Transfer Charge Projections
+
+export interface ChargeArrangementOld { name: string; currentValue: number; ongoingChargePct: number; exitPenaltyPct: number }
+export interface ChargeArrangementNew { name: string; ongoingChargePct: number; initialChargePct: number }
+export interface ChargeProjectionAssumptions { projectionYears: number; grossGrowthRatePct: number }
+export interface ChargeProjectionYear { year: number; oldValue: number; newValue: number }
+export interface ChargeProjectionResults {
+  series: ChargeProjectionYear[];
+  startingNewValue: number;
+  finalOldValue: number;
+  finalNewValue: number;
+  difference: number;
+  differencePct: number;
+}
+
+export interface ChargeProjection {
+  id: string;
+  householdId: string;
+  name: string | null;
+  oldArrangement: ChargeArrangementOld;
+  newArrangement: ChargeArrangementNew;
+  assumptions: ChargeProjectionAssumptions;
+  results: ChargeProjectionResults;
+  aiNarrative: string | null;
+  aiNarrativeError: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Report Template Builder
 
 export interface ReportTemplate {
