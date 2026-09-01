@@ -113,6 +113,13 @@ is the load-bearing piece of this backend — read
   exactly what "done" means per step, including one documented
   simplification (Suitability = ready, not generated).
 
+- `services/fact-find/fact-find-parser.service.ts` (wired into
+  `AiController` as `POST ai/fact-find-parse`) — Meeting-to-Fact-Find:
+  stateless text-to-structured-JSON extraction from meeting notes/call
+  transcripts, deliberately excluding the ATR questionnaire and
+  declaration (those need the client's own direct answer, not an
+  inference). See the frontend README's Meeting-to-Fact-Find AI section.
+
 ## Running it
 
 ```bash

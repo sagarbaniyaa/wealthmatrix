@@ -338,6 +338,33 @@ against. Verified live against real usage (not just test data) — an
 adviser's own in-progress "Annual Review Report" draft correctly showed
 up as "Report: Draft in progress" on this tracker.
 
+### Meeting-to-Fact-Find AI
+
+A collapsible panel at the top of the Fact Find form (`FactFindForm.tsx`)
+— paste in raw meeting notes or a call transcript, click **"Parse &
+pre-fill"**, and AI extracts what it can into the form's own state:
+purposes, personal circumstances, income/expenditure, assets,
+liabilities, insurance, investment/retirement questions.
+
+- **`POST ai/fact-find-parse`** — stateless (no `householdId`, not tied
+  to any stored record): given raw text, returns `{ parsed, gaps, error
+  }`. `FactFindParserService` uses `ClaudeClientService.completeJSON`
+  with an explicit target shape in the system prompt.
+- **Deliberately excluded from extraction**: the Attitude-to-Risk
+  questionnaire and the declaration/signature section. Both need the
+  client's own direct answer or signature — inferring an ATR answer from
+  a conversational summary would be fabricating suitability-relevant
+  data, not "pre-filling a form field", so this simply doesn't attempt it.
+- **`gaps`** is the other half of the honesty story: rather than only
+  reporting what it found, the model is asked to name what a proper Fact
+  Find would need that the notes never mentioned (e.g. "Date of birth not
+  mentioned") — shown to the adviser as a follow-up checklist, not
+  silently left blank.
+- Parsing **merges** into whichever section state already exists in the
+  form (only sections the AI actually returned anything for are
+  touched) — it doesn't create a new fact find or wipe fields the
+  adviser already typed in a section the notes didn't cover.
+
 ## Architecture
 
 **Token handling.** The backend issues a bearer JWT; this frontend never

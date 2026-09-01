@@ -7,6 +7,8 @@ import { WealthAnalystService } from '../services/wealth-analyst/wealth-analyst.
 import { FundAiService } from '../services/fund-research/fund-ai.service';
 import { CompareFundsDto } from '../modules/fund/dto/compare-funds.dto';
 import { SuitabilityReportService } from '../services/suitability-report/suitability-report.service';
+import { FactFindParserService } from '../services/fact-find/fact-find-parser.service';
+import { ParseFactFindNotesDto } from './dto/parse-fact-find-notes.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('ai')
@@ -15,6 +17,7 @@ export class AiController {
     private readonly analyst: WealthAnalystService,
     private readonly fundAnalyst: FundAiService,
     private readonly suitabilityReport: SuitabilityReportService,
+    private readonly factFindParser: FactFindParserService,
   ) {}
 
   @Post('insights/:householdId')
@@ -74,5 +77,13 @@ export class AiController {
   @Roles(Role.ADMIN, Role.ADVISER)
   suitabilityReportFor(@Param('householdId') householdId: string) {
     return this.suitabilityReport.generateReport(householdId);
+  }
+
+  // Meeting-to-Fact-Find: no householdId needed — this is a stateless
+  // text-to-structured-data extraction, not tied to any stored record.
+  @Post('fact-find-parse')
+  @Roles(Role.ADMIN, Role.ADVISER)
+  parseFactFindNotes(@Body() dto: ParseFactFindNotesDto) {
+    return this.factFindParser.parse(dto.notes);
   }
 }

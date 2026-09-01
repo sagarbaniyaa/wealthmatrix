@@ -137,7 +137,78 @@ export function FactFindForm({
     }
   }
 
+  const [meetingNotes, setMeetingNotes] = useState('');
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [gaps, setGaps] = useState<string[]>([]);
+  const [notesExpanded, setNotesExpanded] = useState(false);
+
+  async function parseNotes() {
+    setParsing(true);
+    setParseError(null);
+    try {
+      const res = await api.post<{ parsed: Record<string, any> | null; error: string | null }>('ai/fact-find-parse', { notes: meetingNotes });
+      if (res.error || !res.parsed) {
+        setParseError(res.error ?? 'Could not parse these notes.');
+        return;
+      }
+      const p = res.parsed;
+      if (p.reviewPurposes) setPurposes((prev: any) => ({ ...prev, ...p.reviewPurposes }));
+      if (p.personalCircumstances) setPersonal((prev: any) => ({ ...prev, ...p.personalCircumstances }));
+      if (p.incomeExpenditure) {
+        setIncomeExpenditure((prev: any) => ({
+          client: { ...prev.client, ...(p.incomeExpenditure.client ?? {}) },
+          partner: { ...prev.partner, ...(p.incomeExpenditure.partner ?? {}) },
+        }));
+      }
+      if (p.assets) setAssets((prev: any) => ({ ...prev, ...p.assets }));
+      if (p.liabilities) setLiabilities((prev: any) => ({ ...prev, ...p.liabilities }));
+      if (p.insurance) setInsurance((prev: any) => ({ ...prev, ...p.insurance }));
+      if (p.investmentQuestions) setInvestmentQ((prev: any) => ({ ...prev, ...p.investmentQuestions }));
+      if (p.retirementQuestions) setRetirementQ((prev: any) => ({ ...prev, ...p.retirementQuestions }));
+      setGaps(Array.isArray(p.gaps) ? p.gaps : []);
+      setSection(0);
+    } catch (err) {
+      setParseError(err instanceof Error ? err.message : 'Could not parse these notes.');
+    } finally {
+      setParsing(false);
+    }
+  }
+
   return (
+    <div className="space-y-4">
+    <Card>
+      <button type="button" onClick={() => setNotesExpanded((v) => !v)} className="flex w-full items-center justify-between text-left">
+        <span className="text-xs uppercase tracking-wide text-brass-400">Pre-fill from meeting notes (AI)</span>
+        <span className="text-xs text-ink-500">{notesExpanded ? 'Hide' : 'Show'}</span>
+      </button>
+      {notesExpanded && (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-ink-400">
+            Paste your meeting notes or call transcript below. AI will pre-fill the sections it can from what's
+            actually said — it will not guess at the Attitude-to-Risk questionnaire or invent anything not
+            mentioned; anything missing gets listed below for you to follow up on.
+          </p>
+          <textarea
+            value={meetingNotes} onChange={(e) => setMeetingNotes(e.target.value)} rows={8}
+            placeholder="e.g. Met with the client today. They're recently retired, married to Karen (61)..."
+            className="w-full rounded-sm border border-hairline bg-ink-800 px-3 py-2 text-sm text-ink-100 outline-none placeholder:text-ink-500 focus:border-brass-500"
+          />
+          <Button className="px-4 py-2 text-xs" onClick={parseNotes} disabled={parsing || meetingNotes.trim().length < 10}>
+            {parsing ? 'Parsing…' : 'Parse & pre-fill'}
+          </Button>
+          {parseError && <p className="text-xs text-rust-400">{parseError}</p>}
+          {gaps.length > 0 && (
+            <div className="rounded-sm border border-brass-500/40 bg-brass-500/10 p-3">
+              <p className="mb-1.5 text-xs uppercase tracking-wide text-brass-400">Still needs follow-up</p>
+              <ul className="list-inside list-disc space-y-0.5 text-xs text-ink-300">
+                {gaps.map((g, i) => <li key={i}>{g}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
     <div className="grid grid-cols-[220px_1fr] gap-6">
       <nav className="space-y-1">
         {SECTIONS.map((s, i) => (
@@ -437,6 +508,7 @@ export function FactFindForm({
           </div>
         </Card>
       </div>
+    </div>
     </div>
   );
 }
