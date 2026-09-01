@@ -38,6 +38,9 @@ export default async function HouseholdDetailPage({ params }: { params: { househ
             <Link href={`/advisor/households/${household.id}/look-through`} className="text-sm text-brass-400 hover:text-brass-300">
               Portfolio Look-Through →
             </Link>
+            <Link href={`/advisor/households/${household.id}/retirement-cashflow`} className="text-sm text-brass-400 hover:text-brass-300">
+              Retirement Cashflow →
+            </Link>
             <Link href={`/advisor/households/${household.id}/structure`} className="text-sm text-brass-400 hover:text-brass-300">
               View structure map →
             </Link>

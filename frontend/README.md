@@ -29,6 +29,7 @@ marketing site, an adviser/admin platform, and a client portal.
                                          (Client Journey tracker lives inline on the household page itself)
 /advisor/households/[id]/look-through   True underlying exposure across every fund held
 /client/look-through                    Same view, client-facing ("What you really own")
+/advisor/households/[id]/retirement-cashflow  Monte Carlo retirement sustainability model
 /client/*             Client portal (was `/portal`)
 
 /print/*              Standalone print/export pages (no sidebar), each with a
@@ -403,6 +404,41 @@ funds they own.
 - Purely deterministic aggregation (`PortfolioLookThroughService`) — no
   AI involved, computed fresh on every request like
   `WealthConsolidationService.getHouseholdNetWorth`.
+
+### Retirement Cashflow Monte Carlo
+
+**`/advisor/households/[id]/retirement-cashflow`** — a genuine Monte
+Carlo retirement sustainability model, not a single-line deterministic
+projection: 2,000 simulated annual-return paths per run
+(`RetirementCashflowService.simulate`), producing a **success
+probability** (the % of simulations where the pot never hits zero
+through the plan-to age) and a 10th/50th/90th percentile fan chart
+(`RetirementFanChart.tsx`, raw SVG, no charting library).
+
+- **Everything is modelled in real (inflation-adjusted) terms** —
+  contributions and the desired retirement income stay constant in
+  today's money throughout, and the return assumption is a real
+  (post-inflation) return. Deliberate: a separate nominal-return +
+  inflation-rate pair would only cancel back out arithmetically, so this
+  skips it rather than pretending to more sophistication than that buys.
+- **Return model**: each simulated year draws from
+  Normal(expectedReturnPct, volatilityPct), floored at −95% in any single
+  year. Chosen over a stricter lognormal model for the same reason as the
+  ATR scoring and charge-projection methodology — transparent and
+  documented over a claim of institutional-grade realism.
+- **"Success" is path-dependent, not just the final balance**: a
+  simulation counts as failed the moment the pot hits zero at any point
+  during retirement, not only if the final year is negative — this
+  avoids the common mistake of a model calling a path "successful" after
+  it already ran out of money and recovered on paper.
+- The computed series is **stored**, not recalculated per view — Monte
+  Carlo is inherently random, so re-running it live would show a
+  different-shaped chart on every visit to the same saved scenario.
+- Verified directly against the API: a £500k pot + £500/month to 65,
+  £30k/year real withdrawal to 95, 4%/12% return/volatility produced a
+  71.7% success probability with sensible percentile spread (p10 hits £0
+  by 95, p50 lands at ~£480k, p90 at ~£2.9m) in well under a second for
+  all 2,000 simulations.
 
 ## Architecture
 

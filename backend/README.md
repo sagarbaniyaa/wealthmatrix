@@ -127,6 +127,12 @@ is the load-bearing piece of this backend — read
   (their own household only) — see the frontend README's Portfolio
   Look-Through section for the matching logic and known simplifications.
 
+- `modules/retirement-cashflow`, `services/retirement-cashflow` — Monte
+  Carlo retirement sustainability modelling (2,000 simulated real-return
+  paths per run, path-dependent success criterion, stored not
+  recalculated per view). See the frontend README's Retirement Cashflow
+  Monte Carlo section for the full methodology.
+
 ## Running it
 
 ```bash

@@ -381,6 +381,37 @@ export interface FactFind {
   updatedAt: string;
 }
 
+// Retirement Cashflow Monte Carlo
+
+export interface RetirementCashflowInputs {
+  currentAge: number;
+  retirementAge: number;
+  planToAge: number;
+  currentPotValue: number;
+  monthlyContribution: number;
+  desiredAnnualIncome: number;
+  expectedReturnPct: number;
+  returnVolatilityPct: number;
+}
+export interface RetirementCashflowYear { age: number; p10: number; p50: number; p90: number }
+export interface RetirementCashflowResults {
+  successProbabilityPct: number;
+  series: RetirementCashflowYear[];
+  simulationCount: number;
+}
+export interface RetirementCashflowScenario {
+  id: string;
+  householdId: string;
+  name: string | null;
+  inputs: RetirementCashflowInputs;
+  results: RetirementCashflowResults;
+  aiNarrative: string | null;
+  aiNarrativeError: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Portfolio Look-Through
 
 export interface LookThroughExposure { name: string; value: number; pct: number }
