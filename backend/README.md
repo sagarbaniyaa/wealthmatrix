@@ -106,6 +106,12 @@ is the load-bearing piece of this backend — read
   stored, not recalculated per view. See the frontend README's
   Pension/Plan Transfer Projections section for the "reduction in yield"
   methodology.
+- `modules/household-journey`, `services/household-journey` — the Client
+  Journey Pipeline: a read-only rollup of fact find / risk profile /
+  provider-send / report status across every other module, no new source
+  of truth. See the frontend README's Client Journey Pipeline section for
+  exactly what "done" means per step, including one documented
+  simplification (Suitability = ready, not generated).
 
 ## Running it
 

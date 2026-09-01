@@ -1,14 +1,16 @@
 import { PageHeader } from '@/components/ui/PageHeader';
 import { NetWorthBreakdown } from '@/components/netwealth/NetWorthBreakdown';
 import { RiskInsightsPanel } from '@/components/insights/RiskInsightsPanel';
+import { JourneyTracker } from '@/components/household/JourneyTracker';
 import { serverApiGet } from '@/lib/server-api';
-import type { Household, HouseholdNetWorth } from '@/lib/types';
+import type { Household, HouseholdNetWorth, HouseholdJourney } from '@/lib/types';
 import Link from 'next/link';
 
 export default async function HouseholdDetailPage({ params }: { params: { householdId: string } }) {
-  const [household, netWorth] = await Promise.all([
+  const [household, netWorth, journey] = await Promise.all([
     serverApiGet<Household>(`households/${params.householdId}`),
     serverApiGet<HouseholdNetWorth>(`households/${params.householdId}/net-worth`),
+    serverApiGet<HouseholdJourney>(`households/${params.householdId}/journey`),
   ]);
 
   return (
@@ -48,6 +50,7 @@ export default async function HouseholdDetailPage({ params }: { params: { househ
           </div>
         }
       />
+      <JourneyTracker journey={journey} />
       <NetWorthBreakdown data={netWorth} />
       <RiskInsightsPanel householdId={household.id} />
     </div>

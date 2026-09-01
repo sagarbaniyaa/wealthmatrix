@@ -26,6 +26,7 @@ marketing site, an adviser/admin platform, and a client portal.
 /advisor/households/[id]/report-builder  Generate a new report of any uploaded type for this client
 /print/report-case/[id]                 The generated report, printable
 /advisor/households/[id]/projections    Pension/plan transfer charge & growth projection calculator
+                                         (Client Journey tracker lives inline on the household page itself)
 /client/*             Client portal (was `/portal`)
 
 /print/*              Standalone print/export pages (no sidebar), each with a
@@ -313,6 +314,29 @@ for a specific client, in that same format, from that client's real data.
 - The year-by-year series is **stored**, not recalculated on every view — if the formula is ever refined later, a projection a client has already been shown stays exactly reproducible.
 - An optional AI note (`ClaudeClientService`) explains the result in plain English — same non-recommending, numbers-already-computed discipline as every other AI feature here; it narrates, it doesn't judge suitability.
 - Rendered with a small original SVG line chart (`ChargeProjectionChart.tsx`) — no charting library, same convention as `FundPerformanceChart`.
+
+### Client Journey Pipeline
+
+A 5-step progress tracker (`JourneyTracker.tsx`) embedded directly at the
+top of every household's detail page — not a new data source, a rollup
+of state that already lives across the modules built this session:
+
+| Step | "Done" means |
+|---|---|
+| Fact Find | Latest fact find's `status` is `completed` |
+| Risk Profile | The primary contact's `person.riskTolerance` is set |
+| Suitability | A completed fact find exists |
+| LOA / Provider Send | At least one `compliance_provider_actions` row with status `SENT`/`RECEIVED` |
+| Report | At least one `report_case` with status `final` |
+
+**One deliberate simplification, documented rather than hidden**: the
+"Suitability" step can only report *ready to generate* (a completed fact
+find exists), not *actually generated and reviewed* — the Suitability
+Report page computes its output fresh on every view and never persists
+it (see `SuitabilityReportService`), so there's no record to check
+against. Verified live against real usage (not just test data) — an
+adviser's own in-progress "Annual Review Report" draft correctly showed
+up as "Report: Draft in progress" on this tracker.
 
 ## Architecture
 

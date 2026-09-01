@@ -46,6 +46,7 @@ import { FXConversionModule } from './services/fx-conversion/fx-conversion.modul
 import { ProviderHubModule } from './services/provider-hub/provider-hub.module';
 import { ReportBuilderModule } from './services/report-builder/report-builder.module';
 import { ChargeProjectionModule } from './services/charge-projection/charge-projection.module';
+import { HouseholdJourneyModule } from './services/household-journey/household-journey.module';
 
 import { AiModule } from './ai/ai.module';
 
@@ -95,6 +96,7 @@ import { AiModule } from './ai/ai.module';
     ProviderHubModule,
     ReportBuilderModule,
     ChargeProjectionModule,
+    HouseholdJourneyModule,
 
     AiModule,
   ],

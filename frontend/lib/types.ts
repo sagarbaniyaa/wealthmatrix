@@ -381,6 +381,23 @@ export interface FactFind {
   updatedAt: string;
 }
 
+// Client Journey Pipeline
+
+export type JourneyStepStatus = 'not_started' | 'in_progress' | 'done';
+
+export interface JourneyStep {
+  key: string;
+  label: string;
+  status: JourneyStepStatus;
+  detail: string;
+  linkPath: string;
+}
+
+export interface HouseholdJourney {
+  householdId: string;
+  steps: JourneyStep[];
+}
+
 // Pension/Plan Transfer Charge Projections
 
 export interface ChargeArrangementOld { name: string; currentValue: number; ongoingChargePct: number; exitPenaltyPct: number }
