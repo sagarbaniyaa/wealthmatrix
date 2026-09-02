@@ -73,6 +73,13 @@ export enum ClientDocumentType {
   BANK_STATEMENT = 'BANK_STATEMENT',
   POLICY_SUMMARY = 'POLICY_SUMMARY',
   ADVISER_DETAILS = 'ADVISER_DETAILS',
+  // Document Intake — raw adviser uploads that get OCR/NLP-extracted and
+  // auto-applied to the client record, distinct from FACT_FIND above
+  // (which is the platform's own GENERATED fact-find PDF, never uploaded).
+  FACT_FIND_SOURCE = 'FACT_FIND_SOURCE',
+  RISK_PROFILE = 'RISK_PROFILE',
+  FILE_NOTE = 'FILE_NOTE',
+  PROVIDER_STATEMENT = 'PROVIDER_STATEMENT',
 }
 
 // Docs the adviser must actually upload themselves — we can't legitimately
@@ -84,6 +91,28 @@ export const UPLOADABLE_DOCUMENT_TYPES = [
   ClientDocumentType.ID_PROOF,
   ClientDocumentType.ADDRESS_PROOF,
   ClientDocumentType.BANK_STATEMENT,
+  ClientDocumentType.FACT_FIND_SOURCE,
+  ClientDocumentType.RISK_PROFILE,
+  ClientDocumentType.FILE_NOTE,
+  ClientDocumentType.PROVIDER_STATEMENT,
+] as const;
+
+// The subset that Document Intake actually runs OCR/NLP extraction
+// against and tries to auto-apply to the client record. KYC/ID_PROOF/
+// ADDRESS_PROOF/BANK_STATEMENT are uploadable (see above) for attaching
+// to a provider send pack, but a photo ID or bank statement mostly
+// carries identity/financial signal that's either already covered by
+// FACT_FIND_SOURCE or too risky to auto-apply without adviser review —
+// so BANK_STATEMENT is summarised+noted, not auto-applied to figures.
+export const EXTRACTABLE_DOCUMENT_TYPES = [
+  ClientDocumentType.FACT_FIND_SOURCE,
+  ClientDocumentType.KYC,
+  ClientDocumentType.ID_PROOF,
+  ClientDocumentType.ADDRESS_PROOF,
+  ClientDocumentType.RISK_PROFILE,
+  ClientDocumentType.FILE_NOTE,
+  ClientDocumentType.BANK_STATEMENT,
+  ClientDocumentType.PROVIDER_STATEMENT,
 ] as const;
 
 export enum ProviderActionStatus {

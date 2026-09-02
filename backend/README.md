@@ -133,6 +133,25 @@ is the load-bearing piece of this backend — read
   recalculated per view). See the frontend README's Retirement Cashflow
   Monte Carlo section for the full methodology.
 
+- `services/document-intake` (`IdentityExtractorService`, `DocumentSummarizerService`,
+  `DocumentIntakeService`), wired into `modules/client-document` — Document
+  Intake: OCR (tesseract.js, images) + the existing DOCX/PDF text
+  extractors feed a per-document-type Claude pass that runs automatically
+  right after upload. `FACT_FIND_SOURCE` fills identity fields onto the
+  client's Person record (fill-empty-only, never overwrites) and creates
+  a draft Fact Find via the existing `FactFindParserService`/`FactFindService`
+  — the same "extract from raw text" engine Meeting-to-Fact-Find AI uses,
+  just fed an uploaded document instead of meeting notes. KYC/ID/address
+  proof fill identity fields only. Risk profile/bank/provider statements/
+  file notes are deliberately NOT auto-written into structured fields —
+  they're summarised into a client note instead, since a figure or risk
+  category from an arbitrary uploaded document isn't safe to silently
+  merge into fields that have their own specific provenance (WealthMatrix's
+  own ATR score, adviser-verified financials). Every run writes a
+  `compliance_log` entry and always saves the document even if extraction
+  fails (`extraction_status`: pending/processing/done/failed/unsupported)
+  — see the frontend README's Document Intake section for the known
+  scanned-PDF gap and the upload UI.
 - `modules/consumer-duty`, `services/consumer-duty` — FCA Consumer Duty
   (PRIN 2A) monitoring. Vulnerability is NOT a new data model: it's read
   straight off each household's latest `fact_find.personal_circumstances`

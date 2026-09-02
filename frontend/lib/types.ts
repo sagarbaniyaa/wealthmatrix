@@ -334,8 +334,12 @@ export interface LoaTemplate {
   updatedAt: string;
 }
 
-export type UploadableDocumentType = 'KYC' | 'ID_PROOF' | 'ADDRESS_PROOF' | 'BANK_STATEMENT';
+export type UploadableDocumentType =
+  | 'KYC' | 'ID_PROOF' | 'ADDRESS_PROOF' | 'BANK_STATEMENT'
+  | 'FACT_FIND_SOURCE' | 'RISK_PROFILE' | 'FILE_NOTE' | 'PROVIDER_STATEMENT';
 export type ClientDocumentType = UploadableDocumentType | 'LOA' | 'FACT_FIND' | 'POLICY_SUMMARY' | 'ADVISER_DETAILS';
+
+export type DocumentExtractionStatus = 'pending' | 'processing' | 'done' | 'failed' | 'unsupported';
 
 export interface ClientDocument {
   id: string;
@@ -346,6 +350,11 @@ export interface ClientDocument {
   source: 'uploaded' | 'generated';
   uploadedBy: string | null;
   createdAt: string;
+  extractionStatus: DocumentExtractionStatus;
+  extractionError: string | null;
+  appliedSummary: string | null;
+  appliedAt: string | null;
+  parsedData: Record<string, unknown>;
 }
 
 export interface PackManifestEntry { documentType: string; fileName: string; included: boolean }

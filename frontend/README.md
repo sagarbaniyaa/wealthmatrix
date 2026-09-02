@@ -440,6 +440,47 @@ through the plan-to age) and a 10th/50th/90th percentile fan chart
   by 95, p50 lands at ~£480k, p90 at ~£2.9m) in well under a second for
   all 2,000 simulations.
 
+### Document Intake
+
+**`/advisor/households/[id]/documents`** — upload a Fact Find, risk
+profile, KYC/ID, proof of address, bank statement, provider statement,
+or file note (PDF, DOCX, or a photo/scan as PNG/JPG); OCR + Claude
+extraction runs automatically and the result shows immediately under
+the file, no separate "process" step:
+
+- **Fact Find upload** is the highest-automation path: it fills identity
+  fields (name, DOB, address, email, phone, NI number) onto the client's
+  record and creates a draft Fact Find from the document — reusing the
+  same `FactFindParserService` that powers Meeting-to-Fact-Find AI, just
+  pointed at a document's text instead of meeting notes. Anything the
+  document didn't cover shows up as a "needs following up" gap, same
+  discipline as that feature.
+- **KYC / ID / address proof** fill identity fields only, and only ever
+  fill an *empty* field — an OCR read never overwrites something already
+  on file.
+- **Risk profile / bank statement / provider statement / file note**
+  are summarised into a client note instead of auto-written into
+  structured fields, on purpose: a stated risk category or figure from
+  an arbitrary uploaded document doesn't have the same provenance as
+  WealthMatrix's own ATR questionnaire score or adviser-verified
+  financials, so mixing it in silently would be worse than flagging it
+  for the adviser to apply themselves.
+- **A failed extraction never blocks the upload** — the file is always
+  saved; only its status (`Processed`/`Failed`/`Unsupported file`)
+  reflects what happened, with the underlying error shown so it's
+  obvious why (e.g. Claude unavailable, or an unreadable file).
+- **Known gap, by design, not silently**: a *scanned PDF* (a photo/scan
+  saved as a PDF, with no real text layer) can't be read — rendering PDF
+  pages to images for OCR needs a native PDF-rasteriser this platform
+  deliberately doesn't take on as a dependency. The upload is rejected
+  with a clear message asking for a PNG/JPG instead, which OCR reads
+  directly.
+- **Image OCR runs via `tesseract.js`** (WASM, no native binary, no paid
+  API key) — the free/no-cost path this platform has used throughout.
+  Trade-off: it downloads ~15MB of core+language data from a public CDN
+  on first use per process, so the very first OCR request after a
+  Render free-tier cold start is noticeably slower than a warm one.
+
 ### Consumer Duty register
 
 **`/advisor/compliance/consumer-duty`** (firm-wide) and

@@ -28,3 +28,8 @@ Thumbs.db
 
 # Misc local scratch
 *.tmp
+
+# tesseract.js caches its downloaded OCR language data in the cwd —
+# re-fetched per process (see Document Intake / DocumentTextExtractorService),
+# never something to commit.
+*.traineddata

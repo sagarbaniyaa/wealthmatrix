@@ -11,6 +11,7 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 import { ClientDocumentService } from './client-document.service';
 import { UploadClientDocumentDto } from './dto/upload-client-document.dto';
 import { HouseholdService } from '../household/household.service';
+import { DocumentIntakeService } from '../../services/document-intake/document-intake.service';
 
 // Nested under a household because every document belongs to exactly one
 // client — KYC, ID proof, address proof, bank statements. These are things
@@ -25,6 +26,7 @@ export class ClientDocumentController {
   constructor(
     private readonly documents: ClientDocumentService,
     private readonly households: HouseholdService,
+    private readonly intake: DocumentIntakeService,
   ) {}
 
   @Get()
@@ -44,7 +46,7 @@ export class ClientDocumentController {
     await this.households.ensureAccessible(householdId, user as any);
     if (!file) throw new BadRequestException('No file uploaded.');
 
-    return this.documents.saveUploaded({
+    const saved = await this.documents.saveUploaded({
       householdId,
       documentType: dto.documentType,
       fileName: file.originalname,
@@ -52,6 +54,21 @@ export class ClientDocumentController {
       fileData: file.buffer,
       uploadedBy: user.userId,
     });
+
+    // Document Intake runs synchronously so the adviser sees what was
+    // auto-filled immediately — never lets extraction failure fail the
+    // upload itself (see DocumentIntakeService).
+    const processed = await this.intake.ingest(saved.id, user.userId);
+    const { fileData, ...meta } = processed as any;
+    return meta;
+  }
+
+  @Post(':documentId/reprocess')
+  async reprocess(@Param('householdId') householdId: string, @Param('documentId') documentId: string, @CurrentUser() user: AuthenticatedUser) {
+    await this.households.ensureAccessible(householdId, user as any);
+    const processed = await this.intake.ingest(documentId, user.userId);
+    const { fileData, ...meta } = processed as any;
+    return meta;
   }
 
   @Get(':documentId/download')
