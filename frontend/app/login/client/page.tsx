@@ -12,7 +12,6 @@ export default function ClientLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firmId, setFirmId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,11 +23,11 @@ export default function ClientLoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firmId }),
+        body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.message ?? 'That email, password, or firm code doesn’t match.');
+        throw new Error(body.message ?? 'That email or password doesn’t match.');
       }
       const { user } = await res.json();
       // No router.refresh() here — see the advisor login page for why.
@@ -54,7 +53,6 @@ export default function ClientLoginPage() {
         </Link>
 
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-ink-100 bg-white p-8 shadow-sm">
-          <Field label="Firm code" value={firmId} onChange={setFirmId} placeholder="Given by your adviser" />
           <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="you@example.com" />
           <Field label="Password" value={password} onChange={setPassword} type="password" placeholder="••••••••" />
 

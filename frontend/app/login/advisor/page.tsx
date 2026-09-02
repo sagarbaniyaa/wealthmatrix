@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // Professional, understated — matches the adviser platform's dark ledger
-// aesthetic. Firm ID is still required (the backend scopes login by
-// firm), but framed as a firm reference rather than a raw field label.
+// aesthetic. No firm reference field: the backend auto-resolves the firm
+// when there's exactly one in the system (every demo/single-tenant
+// deployment) — it only becomes a required field again once a second
+// firm actually exists, at which point this form would need it back.
 export default function AdvisorLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firmId, setFirmId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +24,7 @@ export default function AdvisorLoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firmId }),
+        body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -57,7 +58,6 @@ export default function AdvisorLoginPage() {
         </Link>
 
         <form onSubmit={handleSubmit} className="space-y-4 rounded-sm border border-hairline bg-ink-900 p-8">
-          <Field label="Firm reference" value={firmId} onChange={setFirmId} placeholder="firm UUID" />
           <Field label="Email" value={email} onChange={setEmail} type="email" placeholder="you@firm.com" />
           <Field label="Password" value={password} onChange={setPassword} type="password" placeholder="••••••••" />
 
