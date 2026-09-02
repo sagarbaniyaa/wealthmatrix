@@ -20,8 +20,14 @@ export default async function HouseholdDetailPage({ params }: { params: { househ
         title={household.name}
         action={
           <div className="flex gap-3">
+            <Link href={`/advisor/households/${household.id}/action`} className="text-sm text-brass-400 hover:text-brass-300">
+              Client Action →
+            </Link>
             <Link href={`/advisor/households/${household.id}/documents`} className="text-sm text-brass-400 hover:text-brass-300">
               Documents →
+            </Link>
+            <Link href={`/advisor/households/${household.id}/dfm-recommendation`} className="text-sm text-brass-400 hover:text-brass-300">
+              DFM Recommendation →
             </Link>
             <Link href={`/advisor/households/${household.id}/profile`} className="text-sm text-brass-400 hover:text-brass-300">
               Client profile →

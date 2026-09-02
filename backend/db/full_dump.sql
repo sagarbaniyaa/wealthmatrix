@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict vOWhVEOJa8meJYO00rzfZJaDd58WBUFUvzfxq5dOATqGLnu6jKaBNZJBzGHQci7
+\restrict olmnicXygm7MM2XszUwgew0LETjy4daWI8t2KcZ4xzwJhM0re3YHuB577xY2Bdv
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -459,6 +459,30 @@ CREATE TABLE public.currency (
 
 
 --
+-- Name: dfm_recommendation; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dfm_recommendation (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    household_id uuid NOT NULL,
+    inputs jsonb DEFAULT '{}'::jsonb NOT NULL,
+    mandate text NOT NULL,
+    risk_alignment text,
+    reasoning jsonb DEFAULT '[]'::jsonb NOT NULL,
+    indicative_fee_range text,
+    fund_categories jsonb DEFAULT '[]'::jsonb NOT NULL,
+    gaps jsonb DEFAULT '[]'::jsonb NOT NULL,
+    ai_narrative text,
+    ai_narrative_error text,
+    created_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.dfm_recommendation FORCE ROW LEVEL SECURITY;
+
+
+--
 -- Name: entity; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -703,6 +727,23 @@ CREATE TABLE public.household (
 );
 
 ALTER TABLE ONLY public.household FORCE ROW LEVEL SECURITY;
+
+
+--
+-- Name: household_action; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.household_action (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    household_id uuid NOT NULL,
+    action_type text NOT NULL,
+    notes text,
+    selected_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.household_action FORCE ROW LEVEL SECURITY;
 
 
 --
@@ -1230,6 +1271,7 @@ b91ad562-0f32-4f07-b702-124baddf9fba	524e600b-d62d-469d-b697-22ced0fbcc07	charge
 a7c24aaa-72ac-4d34-b0fa-e13db8c5faa4	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	1a4eb88a-ac07-45f4-97b3-28c2edcf9b4c	UPDATE	3579ddda-bee0-490a-9a68-6a15424a667a	{"id": "1a4eb88a-ac07-45f4-97b3-28c2edcf9b4c", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 150000, "oldValue": 150000}, {"year": 1, "newValue": 156825, "oldValue": 155700}, {"year": 2, "newValue": 163960.54, "oldValue": 161616.6}, {"year": 3, "newValue": 171420.74, "oldValue": 167758.03}, {"year": 4, "newValue": 179220.39, "oldValue": 174132.84}, {"year": 5, "newValue": 187374.91, "oldValue": 180749.88}, {"year": 6, "newValue": 195900.47, "oldValue": 187618.38}, {"year": 7, "newValue": 204813.94, "oldValue": 194747.88}, {"year": 8, "newValue": 214132.98, "oldValue": 202148.3}, {"year": 9, "newValue": 223876.03, "oldValue": 209829.93}, {"year": 10, "newValue": 234062.39, "oldValue": 217803.47}], "difference": 16258.92, "differencePct": 7.46, "finalNewValue": 234062.39, "finalOldValue": 217803.47, "startingNewValue": 150000}, "created_at": "2026-09-01T11:51:51.966246+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T11:51:51.966246+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "new_arrangement": {"name": "Fidelity SIPP", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva Personal Pension", "currentValue": 150000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": null}	{"id": "1a4eb88a-ac07-45f4-97b3-28c2edcf9b4c", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 150000, "oldValue": 150000}, {"year": 1, "newValue": 156825, "oldValue": 155700}, {"year": 2, "newValue": 163960.54, "oldValue": 161616.6}, {"year": 3, "newValue": 171420.74, "oldValue": 167758.03}, {"year": 4, "newValue": 179220.39, "oldValue": 174132.84}, {"year": 5, "newValue": 187374.91, "oldValue": 180749.88}, {"year": 6, "newValue": 195900.47, "oldValue": 187618.38}, {"year": 7, "newValue": 204813.94, "oldValue": 194747.88}, {"year": 8, "newValue": 214132.98, "oldValue": 202148.3}, {"year": 9, "newValue": 223876.03, "oldValue": 209829.93}, {"year": 10, "newValue": 234062.39, "oldValue": 217803.47}], "difference": 16258.92, "differencePct": 7.46, "finalNewValue": 234062.39, "finalOldValue": 217803.47, "startingNewValue": 150000}, "created_at": "2026-09-01T11:51:51.966246+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T11:51:51.966246+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "new_arrangement": {"name": "Fidelity SIPP", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva Personal Pension", "currentValue": 150000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	2026-09-01 11:51:51.966246+01
 390e35e4-2969-4dff-b2d7-167c678ed718	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	1a4eb88a-ac07-45f4-97b3-28c2edcf9b4c	DELETE	\N	{"id": "1a4eb88a-ac07-45f4-97b3-28c2edcf9b4c", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 150000, "oldValue": 150000}, {"year": 1, "newValue": 156825, "oldValue": 155700}, {"year": 2, "newValue": 163960.54, "oldValue": 161616.6}, {"year": 3, "newValue": 171420.74, "oldValue": 167758.03}, {"year": 4, "newValue": 179220.39, "oldValue": 174132.84}, {"year": 5, "newValue": 187374.91, "oldValue": 180749.88}, {"year": 6, "newValue": 195900.47, "oldValue": 187618.38}, {"year": 7, "newValue": 204813.94, "oldValue": 194747.88}, {"year": 8, "newValue": 214132.98, "oldValue": 202148.3}, {"year": 9, "newValue": 223876.03, "oldValue": 209829.93}, {"year": 10, "newValue": 234062.39, "oldValue": 217803.47}], "difference": 16258.92, "differencePct": 7.46, "finalNewValue": 234062.39, "finalOldValue": 217803.47, "startingNewValue": 150000}, "created_at": "2026-09-01T11:51:51.966246+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T11:51:51.966246+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "new_arrangement": {"name": "Fidelity SIPP", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva Personal Pension", "currentValue": 150000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	\N	2026-09-01 11:53:00.01227+01
 61f6b579-2e02-4958-a982-5302a52f9860	524e600b-d62d-469d-b697-22ced0fbcc07	retirement_cashflow_scenario	bb757c48-79b9-4f37-9f7b-4fe525b44c3e	INSERT	3579ddda-bee0-490a-9a68-6a15424a667a	\N	{"id": "bb757c48-79b9-4f37-9f7b-4fe525b44c3e", "name": null, "inputs": {"planToAge": 95, "currentAge": 55, "retirementAge": 65, "currentPotValue": 500000, "expectedReturnPct": 4, "desiredAnnualIncome": 30000, "monthlyContribution": 500, "returnVolatilityPct": 12}, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"age": 55, "p10": 500000, "p50": 500000, "p90": 500000}, {"age": 56, "p10": 448658.09, "p50": 525641.92, "p90": 599468.44}, {"age": 57, "p10": 440774.18, "p50": 548788.86, "p90": 668083.94}, {"age": 58, "p10": 438500.94, "p50": 570290.84, "p90": 728124.42}, {"age": 59, "p10": 441314.2, "p50": 594318.18, "p90": 783666.25}, {"age": 60, "p10": 447375.6, "p50": 625730.03, "p90": 847355.42}, {"age": 61, "p10": 461592.95, "p50": 652083.09, "p90": 898008.71}, {"age": 62, "p10": 462094.97, "p50": 677020.1, "p90": 967989.75}, {"age": 63, "p10": 474601.01, "p50": 702243.93, "p90": 1038912.23}, {"age": 64, "p10": 480481.71, "p50": 733675.52, "p90": 1120352.18}, {"age": 65, "p10": 488222.69, "p50": 768540.81, "p90": 1186228.19}, {"age": 66, "p10": 462600.79, "p50": 754884.2, "p90": 1231329.53}, {"age": 67, "p10": 443576.8, "p50": 753625.87, "p90": 1280056.25}, {"age": 68, "p10": 409158.8, "p50": 752247.73, "p90": 1297105.72}, {"age": 69, "p10": 393217.24, "p50": 746527.22, "p90": 1344211.24}, {"age": 70, "p10": 369115.85, "p50": 749877.73, "p90": 1367222.54}, {"age": 71, "p10": 340804.65, "p50": 740021.45, "p90": 1411757.01}, {"age": 72, "p10": 320710.65, "p50": 739101.43, "p90": 1452622.93}, {"age": 73, "p10": 297586, "p50": 729357.58, "p90": 1493116.91}, {"age": 74, "p10": 280013.52, "p50": 737473.54, "p90": 1525332.37}, {"age": 75, "p10": 249770.27, "p50": 720286.8, "p90": 1572338.91}, {"age": 76, "p10": 221706.63, "p50": 705777.48, "p90": 1634161.8}, {"age": 77, "p10": 200402.47, "p50": 690256.84, "p90": 1681241.3}, {"age": 78, "p10": 176086.19, "p50": 686722.66, "p90": 1703222.11}, {"age": 79, "p10": 145875.59, "p50": 676470.42, "p90": 1779807.78}, {"age": 80, "p10": 118943.38, "p50": 656963.51, "p90": 1855701.3}, {"age": 81, "p10": 91481.92, "p50": 660113.66, "p90": 1933562.34}, {"age": 82, "p10": 63457.72, "p50": 646928.52, "p90": 1979097.56}, {"age": 83, "p10": 33368.48, "p50": 635697.74, "p90": 2013423.09}, {"age": 84, "p10": 4238.65, "p50": 624695.24, "p90": 2119475.12}, {"age": 85, "p10": 0, "p50": 606163.5, "p90": 2166589.23}, {"age": 86, "p10": 0, "p50": 593396.69, "p90": 2183099.1}, {"age": 87, "p10": 0, "p50": 591332.86, "p90": 2254096.82}, {"age": 88, "p10": 0, "p50": 572172.73, "p90": 2365974.79}, {"age": 89, "p10": 0, "p50": 568070.81, "p90": 2423598.95}, {"age": 90, "p10": 0, "p50": 561105.45, "p90": 2529195.9}, {"age": 91, "p10": 0, "p50": 532604.9, "p90": 2583394.21}, {"age": 92, "p10": 0, "p50": 527335.51, "p90": 2740788.73}, {"age": 93, "p10": 0, "p50": 502679.35, "p90": 2768498.37}, {"age": 94, "p10": 0, "p50": 486437.97, "p90": 2846084.58}, {"age": 95, "p10": 0, "p50": 479964.77, "p90": 2891662.02}], "simulationCount": 2000, "successProbabilityPct": 71.7}, "created_at": "2026-09-01T12:37:02.947209+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T12:37:02.947209+01:00", "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "ai_narrative_error": null}	2026-09-01 12:37:02.947209+01
+c77bcd3e-44de-432a-8857-1ba22cfb61b8	524e600b-d62d-469d-b697-22ced0fbcc07	person	bba896f2-bf19-4fd9-9d45-4877506217d5	UPDATE	\N	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": null, "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-08-27T14:18:24.801771+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": null, "kyc_verified_at": null, "source_of_wealth": null}	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": null, "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-02T17:39:04.791748+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": "moderate", "kyc_verified_at": null, "source_of_wealth": null}	2026-09-02 17:39:04.791748+01
 f58d4edb-58c2-476c-a668-b41b6ae83702	524e600b-d62d-469d-b697-22ced0fbcc07	retirement_cashflow_scenario	bb757c48-79b9-4f37-9f7b-4fe525b44c3e	UPDATE	3579ddda-bee0-490a-9a68-6a15424a667a	{"id": "bb757c48-79b9-4f37-9f7b-4fe525b44c3e", "name": null, "inputs": {"planToAge": 95, "currentAge": 55, "retirementAge": 65, "currentPotValue": 500000, "expectedReturnPct": 4, "desiredAnnualIncome": 30000, "monthlyContribution": 500, "returnVolatilityPct": 12}, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"age": 55, "p10": 500000, "p50": 500000, "p90": 500000}, {"age": 56, "p10": 448658.09, "p50": 525641.92, "p90": 599468.44}, {"age": 57, "p10": 440774.18, "p50": 548788.86, "p90": 668083.94}, {"age": 58, "p10": 438500.94, "p50": 570290.84, "p90": 728124.42}, {"age": 59, "p10": 441314.2, "p50": 594318.18, "p90": 783666.25}, {"age": 60, "p10": 447375.6, "p50": 625730.03, "p90": 847355.42}, {"age": 61, "p10": 461592.95, "p50": 652083.09, "p90": 898008.71}, {"age": 62, "p10": 462094.97, "p50": 677020.1, "p90": 967989.75}, {"age": 63, "p10": 474601.01, "p50": 702243.93, "p90": 1038912.23}, {"age": 64, "p10": 480481.71, "p50": 733675.52, "p90": 1120352.18}, {"age": 65, "p10": 488222.69, "p50": 768540.81, "p90": 1186228.19}, {"age": 66, "p10": 462600.79, "p50": 754884.2, "p90": 1231329.53}, {"age": 67, "p10": 443576.8, "p50": 753625.87, "p90": 1280056.25}, {"age": 68, "p10": 409158.8, "p50": 752247.73, "p90": 1297105.72}, {"age": 69, "p10": 393217.24, "p50": 746527.22, "p90": 1344211.24}, {"age": 70, "p10": 369115.85, "p50": 749877.73, "p90": 1367222.54}, {"age": 71, "p10": 340804.65, "p50": 740021.45, "p90": 1411757.01}, {"age": 72, "p10": 320710.65, "p50": 739101.43, "p90": 1452622.93}, {"age": 73, "p10": 297586, "p50": 729357.58, "p90": 1493116.91}, {"age": 74, "p10": 280013.52, "p50": 737473.54, "p90": 1525332.37}, {"age": 75, "p10": 249770.27, "p50": 720286.8, "p90": 1572338.91}, {"age": 76, "p10": 221706.63, "p50": 705777.48, "p90": 1634161.8}, {"age": 77, "p10": 200402.47, "p50": 690256.84, "p90": 1681241.3}, {"age": 78, "p10": 176086.19, "p50": 686722.66, "p90": 1703222.11}, {"age": 79, "p10": 145875.59, "p50": 676470.42, "p90": 1779807.78}, {"age": 80, "p10": 118943.38, "p50": 656963.51, "p90": 1855701.3}, {"age": 81, "p10": 91481.92, "p50": 660113.66, "p90": 1933562.34}, {"age": 82, "p10": 63457.72, "p50": 646928.52, "p90": 1979097.56}, {"age": 83, "p10": 33368.48, "p50": 635697.74, "p90": 2013423.09}, {"age": 84, "p10": 4238.65, "p50": 624695.24, "p90": 2119475.12}, {"age": 85, "p10": 0, "p50": 606163.5, "p90": 2166589.23}, {"age": 86, "p10": 0, "p50": 593396.69, "p90": 2183099.1}, {"age": 87, "p10": 0, "p50": 591332.86, "p90": 2254096.82}, {"age": 88, "p10": 0, "p50": 572172.73, "p90": 2365974.79}, {"age": 89, "p10": 0, "p50": 568070.81, "p90": 2423598.95}, {"age": 90, "p10": 0, "p50": 561105.45, "p90": 2529195.9}, {"age": 91, "p10": 0, "p50": 532604.9, "p90": 2583394.21}, {"age": 92, "p10": 0, "p50": 527335.51, "p90": 2740788.73}, {"age": 93, "p10": 0, "p50": 502679.35, "p90": 2768498.37}, {"age": 94, "p10": 0, "p50": 486437.97, "p90": 2846084.58}, {"age": 95, "p10": 0, "p50": 479964.77, "p90": 2891662.02}], "simulationCount": 2000, "successProbabilityPct": 71.7}, "created_at": "2026-09-01T12:37:02.947209+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T12:37:02.947209+01:00", "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "ai_narrative_error": null}	{"id": "bb757c48-79b9-4f37-9f7b-4fe525b44c3e", "name": null, "inputs": {"planToAge": 95, "currentAge": 55, "retirementAge": 65, "currentPotValue": 500000, "expectedReturnPct": 4, "desiredAnnualIncome": 30000, "monthlyContribution": 500, "returnVolatilityPct": 12}, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"age": 55, "p10": 500000, "p50": 500000, "p90": 500000}, {"age": 56, "p10": 448658.09, "p50": 525641.92, "p90": 599468.44}, {"age": 57, "p10": 440774.18, "p50": 548788.86, "p90": 668083.94}, {"age": 58, "p10": 438500.94, "p50": 570290.84, "p90": 728124.42}, {"age": 59, "p10": 441314.2, "p50": 594318.18, "p90": 783666.25}, {"age": 60, "p10": 447375.6, "p50": 625730.03, "p90": 847355.42}, {"age": 61, "p10": 461592.95, "p50": 652083.09, "p90": 898008.71}, {"age": 62, "p10": 462094.97, "p50": 677020.1, "p90": 967989.75}, {"age": 63, "p10": 474601.01, "p50": 702243.93, "p90": 1038912.23}, {"age": 64, "p10": 480481.71, "p50": 733675.52, "p90": 1120352.18}, {"age": 65, "p10": 488222.69, "p50": 768540.81, "p90": 1186228.19}, {"age": 66, "p10": 462600.79, "p50": 754884.2, "p90": 1231329.53}, {"age": 67, "p10": 443576.8, "p50": 753625.87, "p90": 1280056.25}, {"age": 68, "p10": 409158.8, "p50": 752247.73, "p90": 1297105.72}, {"age": 69, "p10": 393217.24, "p50": 746527.22, "p90": 1344211.24}, {"age": 70, "p10": 369115.85, "p50": 749877.73, "p90": 1367222.54}, {"age": 71, "p10": 340804.65, "p50": 740021.45, "p90": 1411757.01}, {"age": 72, "p10": 320710.65, "p50": 739101.43, "p90": 1452622.93}, {"age": 73, "p10": 297586, "p50": 729357.58, "p90": 1493116.91}, {"age": 74, "p10": 280013.52, "p50": 737473.54, "p90": 1525332.37}, {"age": 75, "p10": 249770.27, "p50": 720286.8, "p90": 1572338.91}, {"age": 76, "p10": 221706.63, "p50": 705777.48, "p90": 1634161.8}, {"age": 77, "p10": 200402.47, "p50": 690256.84, "p90": 1681241.3}, {"age": 78, "p10": 176086.19, "p50": 686722.66, "p90": 1703222.11}, {"age": 79, "p10": 145875.59, "p50": 676470.42, "p90": 1779807.78}, {"age": 80, "p10": 118943.38, "p50": 656963.51, "p90": 1855701.3}, {"age": 81, "p10": 91481.92, "p50": 660113.66, "p90": 1933562.34}, {"age": 82, "p10": 63457.72, "p50": 646928.52, "p90": 1979097.56}, {"age": 83, "p10": 33368.48, "p50": 635697.74, "p90": 2013423.09}, {"age": 84, "p10": 4238.65, "p50": 624695.24, "p90": 2119475.12}, {"age": 85, "p10": 0, "p50": 606163.5, "p90": 2166589.23}, {"age": 86, "p10": 0, "p50": 593396.69, "p90": 2183099.1}, {"age": 87, "p10": 0, "p50": 591332.86, "p90": 2254096.82}, {"age": 88, "p10": 0, "p50": 572172.73, "p90": 2365974.79}, {"age": 89, "p10": 0, "p50": 568070.81, "p90": 2423598.95}, {"age": 90, "p10": 0, "p50": 561105.45, "p90": 2529195.9}, {"age": 91, "p10": 0, "p50": 532604.9, "p90": 2583394.21}, {"age": 92, "p10": 0, "p50": 527335.51, "p90": 2740788.73}, {"age": 93, "p10": 0, "p50": 502679.35, "p90": 2768498.37}, {"age": 94, "p10": 0, "p50": 486437.97, "p90": 2846084.58}, {"age": 95, "p10": 0, "p50": 479964.77, "p90": 2891662.02}], "simulationCount": 2000, "successProbabilityPct": 71.7}, "created_at": "2026-09-01T12:37:02.947209+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T12:37:02.947209+01:00", "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	2026-09-01 12:37:02.947209+01
 5c044a73-5d71-4ad8-b8f0-5db732dddaca	524e600b-d62d-469d-b697-22ced0fbcc07	retirement_cashflow_scenario	bb757c48-79b9-4f37-9f7b-4fe525b44c3e	DELETE	\N	{"id": "bb757c48-79b9-4f37-9f7b-4fe525b44c3e", "name": null, "inputs": {"planToAge": 95, "currentAge": 55, "retirementAge": 65, "currentPotValue": 500000, "expectedReturnPct": 4, "desiredAnnualIncome": 30000, "monthlyContribution": 500, "returnVolatilityPct": 12}, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"age": 55, "p10": 500000, "p50": 500000, "p90": 500000}, {"age": 56, "p10": 448658.09, "p50": 525641.92, "p90": 599468.44}, {"age": 57, "p10": 440774.18, "p50": 548788.86, "p90": 668083.94}, {"age": 58, "p10": 438500.94, "p50": 570290.84, "p90": 728124.42}, {"age": 59, "p10": 441314.2, "p50": 594318.18, "p90": 783666.25}, {"age": 60, "p10": 447375.6, "p50": 625730.03, "p90": 847355.42}, {"age": 61, "p10": 461592.95, "p50": 652083.09, "p90": 898008.71}, {"age": 62, "p10": 462094.97, "p50": 677020.1, "p90": 967989.75}, {"age": 63, "p10": 474601.01, "p50": 702243.93, "p90": 1038912.23}, {"age": 64, "p10": 480481.71, "p50": 733675.52, "p90": 1120352.18}, {"age": 65, "p10": 488222.69, "p50": 768540.81, "p90": 1186228.19}, {"age": 66, "p10": 462600.79, "p50": 754884.2, "p90": 1231329.53}, {"age": 67, "p10": 443576.8, "p50": 753625.87, "p90": 1280056.25}, {"age": 68, "p10": 409158.8, "p50": 752247.73, "p90": 1297105.72}, {"age": 69, "p10": 393217.24, "p50": 746527.22, "p90": 1344211.24}, {"age": 70, "p10": 369115.85, "p50": 749877.73, "p90": 1367222.54}, {"age": 71, "p10": 340804.65, "p50": 740021.45, "p90": 1411757.01}, {"age": 72, "p10": 320710.65, "p50": 739101.43, "p90": 1452622.93}, {"age": 73, "p10": 297586, "p50": 729357.58, "p90": 1493116.91}, {"age": 74, "p10": 280013.52, "p50": 737473.54, "p90": 1525332.37}, {"age": 75, "p10": 249770.27, "p50": 720286.8, "p90": 1572338.91}, {"age": 76, "p10": 221706.63, "p50": 705777.48, "p90": 1634161.8}, {"age": 77, "p10": 200402.47, "p50": 690256.84, "p90": 1681241.3}, {"age": 78, "p10": 176086.19, "p50": 686722.66, "p90": 1703222.11}, {"age": 79, "p10": 145875.59, "p50": 676470.42, "p90": 1779807.78}, {"age": 80, "p10": 118943.38, "p50": 656963.51, "p90": 1855701.3}, {"age": 81, "p10": 91481.92, "p50": 660113.66, "p90": 1933562.34}, {"age": 82, "p10": 63457.72, "p50": 646928.52, "p90": 1979097.56}, {"age": 83, "p10": 33368.48, "p50": 635697.74, "p90": 2013423.09}, {"age": 84, "p10": 4238.65, "p50": 624695.24, "p90": 2119475.12}, {"age": 85, "p10": 0, "p50": 606163.5, "p90": 2166589.23}, {"age": 86, "p10": 0, "p50": 593396.69, "p90": 2183099.1}, {"age": 87, "p10": 0, "p50": 591332.86, "p90": 2254096.82}, {"age": 88, "p10": 0, "p50": 572172.73, "p90": 2365974.79}, {"age": 89, "p10": 0, "p50": 568070.81, "p90": 2423598.95}, {"age": 90, "p10": 0, "p50": 561105.45, "p90": 2529195.9}, {"age": 91, "p10": 0, "p50": 532604.9, "p90": 2583394.21}, {"age": 92, "p10": 0, "p50": 527335.51, "p90": 2740788.73}, {"age": 93, "p10": 0, "p50": 502679.35, "p90": 2768498.37}, {"age": 94, "p10": 0, "p50": 486437.97, "p90": 2846084.58}, {"age": 95, "p10": 0, "p50": 479964.77, "p90": 2891662.02}], "simulationCount": 2000, "successProbabilityPct": 71.7}, "created_at": "2026-09-01T12:37:02.947209+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T12:37:02.947209+01:00", "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	\N	2026-09-01 12:37:23.307792+01
 7da6c89a-b7b8-4675-998a-92b2f5a07808	524e600b-d62d-469d-b697-22ced0fbcc07	retirement_cashflow_scenario	ff724d7f-85c3-4d53-b660-a5114e931ffc	INSERT	3579ddda-bee0-490a-9a68-6a15424a667a	\N	{"id": "ff724d7f-85c3-4d53-b660-a5114e931ffc", "name": null, "inputs": {"planToAge": 95, "currentAge": 55, "retirementAge": 65, "currentPotValue": 500000, "expectedReturnPct": 4, "desiredAnnualIncome": 30000, "monthlyContribution": 500, "returnVolatilityPct": 12}, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"age": 55, "p10": 500000, "p50": 500000, "p90": 500000}, {"age": 56, "p10": 452236.6, "p50": 526313.69, "p90": 601086.49}, {"age": 57, "p10": 434945.46, "p50": 547692.41, "p90": 665814.55}, {"age": 58, "p10": 438808.19, "p50": 567437.95, "p90": 721957.02}, {"age": 59, "p10": 441803.24, "p50": 599168.11, "p90": 790156.51}, {"age": 60, "p10": 446865.66, "p50": 621946.92, "p90": 849348.76}, {"age": 61, "p10": 451264.81, "p50": 653657.15, "p90": 918915.15}, {"age": 62, "p10": 460471.27, "p50": 679599.56, "p90": 986494.9}, {"age": 63, "p10": 472991.31, "p50": 707660.83, "p90": 1034567.32}, {"age": 64, "p10": 480000.45, "p50": 733609.44, "p90": 1101298.49}, {"age": 65, "p10": 490315.77, "p50": 770213.98, "p90": 1165772.98}, {"age": 66, "p10": 466860.35, "p50": 763306.93, "p90": 1217257.57}, {"age": 67, "p10": 452117.42, "p50": 753082.82, "p90": 1243362.91}, {"age": 68, "p10": 431531.38, "p50": 750463.11, "p90": 1289042.74}, {"age": 69, "p10": 396615.39, "p50": 745671.97, "p90": 1311679.17}, {"age": 70, "p10": 371068.32, "p50": 732680.27, "p90": 1379945.76}, {"age": 71, "p10": 352932.86, "p50": 727238.1, "p90": 1418470.11}, {"age": 72, "p10": 331802.28, "p50": 726494.28, "p90": 1441882.32}, {"age": 73, "p10": 307751.94, "p50": 709403.93, "p90": 1480309.25}, {"age": 74, "p10": 277574.81, "p50": 702607.18, "p90": 1518787.45}, {"age": 75, "p10": 260722, "p50": 692737.11, "p90": 1579724.71}, {"age": 76, "p10": 220174.62, "p50": 682902.32, "p90": 1605070.15}, {"age": 77, "p10": 199601.78, "p50": 669819.34, "p90": 1643579.05}, {"age": 78, "p10": 170154.61, "p50": 662573.95, "p90": 1708761.88}, {"age": 79, "p10": 148497.61, "p50": 659907.6, "p90": 1733278.25}, {"age": 80, "p10": 121097.11, "p50": 658779.52, "p90": 1774318.47}, {"age": 81, "p10": 94006.18, "p50": 638585.94, "p90": 1838043.09}, {"age": 82, "p10": 61489.76, "p50": 636119.82, "p90": 1910664.89}, {"age": 83, "p10": 33357.1, "p50": 618323.58, "p90": 1968173.42}, {"age": 84, "p10": 3930.08, "p50": 612387.73, "p90": 2025857.19}, {"age": 85, "p10": 0, "p50": 603260.38, "p90": 2081935.33}, {"age": 86, "p10": 0, "p50": 596284.75, "p90": 2139758.34}, {"age": 87, "p10": 0, "p50": 585880.1, "p90": 2221669.6}, {"age": 88, "p10": 0, "p50": 566740.14, "p90": 2343489.75}, {"age": 89, "p10": 0, "p50": 564240.05, "p90": 2382996.9}, {"age": 90, "p10": 0, "p50": 540871.86, "p90": 2433909.33}, {"age": 91, "p10": 0, "p50": 518306.91, "p90": 2442789.58}, {"age": 92, "p10": 0, "p50": 517491.5, "p90": 2539590.92}, {"age": 93, "p10": 0, "p50": 487304.14, "p90": 2608484.82}, {"age": 94, "p10": 0, "p50": 471215.36, "p90": 2687479.31}, {"age": 95, "p10": 0, "p50": 457769.18, "p90": 2750456.67}], "simulationCount": 2000, "successProbabilityPct": 72.4}, "created_at": "2026-09-01T12:56:10.82186+01:00", "created_by": "3579ddda-bee0-490a-9a68-6a15424a667a", "updated_at": "2026-09-01T12:56:10.82186+01:00", "ai_narrative": null, "household_id": "18889b89-2f36-4a30-aa55-d4fef82b3814", "ai_narrative_error": null}	2026-09-01 12:56:10.82186+01
@@ -1245,6 +1287,12 @@ cb47f987-39da-438d-810b-bd4c10382c34	524e600b-d62d-469d-b697-22ced0fbcc07	client
 99707559-854f-4dbe-92fe-feb0b946cd28	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	5c2bcf49-164e-4b78-a6fd-95ead6067ceb	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "5c2bcf49-164e-4b78-a6fd-95ead6067ceb", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x6a75737420736f6d6520746578740a", "file_name": "note.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-02T17:03:50.787347+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "FILE_NOTE", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "pending"}	2026-09-02 17:03:50.787347+01
 b6d40edf-64a7-4d8f-bcb4-46a3ed210322	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	5c2bcf49-164e-4b78-a6fd-95ead6067ceb	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "5c2bcf49-164e-4b78-a6fd-95ead6067ceb", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x6a75737420736f6d6520746578740a", "file_name": "note.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-02T17:03:50.787347+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "FILE_NOTE", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "pending"}	{"id": "5c2bcf49-164e-4b78-a6fd-95ead6067ceb", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x6a75737420736f6d6520746578740a", "file_name": "note.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-02T17:03:50.787347+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "FILE_NOTE", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "processing"}	2026-09-02 17:03:50.787347+01
 edcd94a4-d4dd-4c93-83ed-1b64e2725b1d	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	5c2bcf49-164e-4b78-a6fd-95ead6067ceb	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "5c2bcf49-164e-4b78-a6fd-95ead6067ceb", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x6a75737420736f6d6520746578740a", "file_name": "note.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-02T17:03:50.787347+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "FILE_NOTE", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "processing"}	{"id": "5c2bcf49-164e-4b78-a6fd-95ead6067ceb", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x6a75737420736f6d6520746578740a", "file_name": "note.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-02T17:03:50.787347+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "FILE_NOTE", "extracted_text": null, "applied_summary": null, "extraction_error": "Unsupported file type for text extraction: text/plain", "extraction_status": "unsupported"}	2026-09-02 17:03:50.787347+01
+cc3a1467-4498-4d1a-a0ac-f280a27484f9	524e600b-d62d-469d-b697-22ced0fbcc07	person	bba896f2-bf19-4fd9-9d45-4877506217d5	UPDATE	\N	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": null, "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-02T17:39:04.791748+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": "moderate", "kyc_verified_at": null, "source_of_wealth": null}	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": null, "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-02T17:39:15.552113+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": null, "kyc_verified_at": null, "source_of_wealth": null}	2026-09-02 17:39:15.552113+01
+cad744a1-9c47-4f7b-a91e-f04bc4b0d825	524e600b-d62d-469d-b697-22ced0fbcc07	household_action	93ad753d-3030-478f-b0a2-64bcbfa523c0	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "93ad753d-3030-478f-b0a2-64bcbfa523c0", "notes": "Aviva to Fidelity", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-02T17:39:27.061032+01:00", "action_type": "pension_transfer", "selected_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	2026-09-02 17:39:27.061032+01
+99bc9c25-5174-44e4-b516-52c9dd72ee26	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	c6175042-18e6-457e-917f-ba4b727c694f	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": null}	2026-09-02 17:39:41.769355+01
+273e2c52-bdc4-4abc-bfba-c2f10cc1c15a	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	c6175042-18e6-457e-917f-ba4b727c694f	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": null}	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	2026-09-02 17:39:41.769355+01
+79a6cec6-b463-49f2-90dd-44f02ebd5de2	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	c6175042-18e6-457e-917f-ba4b727c694f	DELETE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	\N	2026-09-02 17:39:52.757887+01
+038d49fd-a2a9-4e0f-9e50-5d35578cc6aa	524e600b-d62d-469d-b697-22ced0fbcc07	household_action	93ad753d-3030-478f-b0a2-64bcbfa523c0	DELETE	\N	{"id": "93ad753d-3030-478f-b0a2-64bcbfa523c0", "notes": "Aviva to Fidelity", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-02T17:39:27.061032+01:00", "action_type": "pension_transfer", "selected_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	\N	2026-09-02 17:39:52.920552+01
 \.
 
 
@@ -1308,6 +1356,14 @@ COPY public.currency (id, code, name, symbol) FROM stdin;
 e9feca71-ef57-41df-ab3a-7e8cd3c2211d	GBP	British Pound	£
 98465946-c6a3-4f47-a265-24e2b4d660c2	EUR	Euro	€
 db6efca6-3f6f-488f-91e0-47fb17487212	USD	US Dollar	$
+\.
+
+
+--
+-- Data for Name: dfm_recommendation; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.dfm_recommendation (id, firm_id, household_id, inputs, mandate, risk_alignment, reasoning, indicative_fee_range, fund_categories, gaps, ai_narrative, ai_narrative_error, created_by, created_at) FROM stdin;
 \.
 
 
@@ -1456,6 +1512,14 @@ a4f0f87d-b4c5-46c3-a471-966efeb22c50	524e600b-d62d-469d-b697-22ced0fbcc07	Scott	
 
 
 --
+-- Data for Name: household_action; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.household_action (id, firm_id, household_id, action_type, notes, selected_by, created_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: household_member; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -1490,9 +1554,9 @@ COPY public.loa_template (id, firm_id, name, file_name, mime_type, file_data, fi
 --
 
 COPY public.person (id, firm_id, first_name, last_name, date_of_birth, tax_residency, domicile, is_active, created_at, updated_at, phone, email, address_line1, address_line2, city, postal_code, country, risk_tolerance, kyc_status, kyc_verified_at, source_of_wealth, ni_number) FROM stdin;
-bba896f2-bf19-4fd9-9d45-4877506217d5	524e600b-d62d-469d-b697-22ced0fbcc07	Edward	Whitmore	\N	GB	GB	t	2026-08-27 14:18:24.801771+01	2026-08-27 14:18:24.801771+01	\N	\N	\N	\N	\N	\N	\N	\N	pending	\N	\N	\N
 df10227b-e170-413e-8171-af63cc6248c2	524e600b-d62d-469d-b697-22ced0fbcc07	Mike 	Scott	\N	United Kingdom	\N	t	2026-08-27 14:29:20.284349+01	2026-08-27 14:46:14.464307+01	\N	\N	\N	\N	\N	\N	\N	\N	pending	\N	\N	\N
 ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c	524e600b-d62d-469d-b697-22ced0fbcc07	Alexandra	Sterling	\N	GB	GB	t	2026-08-26 16:26:55.770432+01	2026-08-28 13:56:46.483566+01	+44 20 7946 0958	alexandra.sterling@example.com	\N	\N	London	\N	\N	moderate	verified	\N	Sale of family business	QQ123456C
+bba896f2-bf19-4fd9-9d45-4877506217d5	524e600b-d62d-469d-b697-22ced0fbcc07	Edward	Whitmore	\N	GB	GB	t	2026-08-27 14:18:24.801771+01	2026-09-02 17:39:15.552113+01	\N	\N	\N	\N	\N	\N	\N	\N	pending	\N	\N	\N
 \.
 
 
@@ -1721,6 +1785,14 @@ ALTER TABLE ONLY public.currency
 
 
 --
+-- Name: dfm_recommendation dfm_recommendation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dfm_recommendation
+    ADD CONSTRAINT dfm_recommendation_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: entity_ownership entity_ownership_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1846,6 +1918,14 @@ ALTER TABLE ONLY public.holding
 
 ALTER TABLE ONLY public.holding
     ADD CONSTRAINT holding_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: household_action household_action_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.household_action
+    ADD CONSTRAINT household_action_pkey PRIMARY KEY (id);
 
 
 --
@@ -2117,6 +2197,20 @@ CREATE INDEX idx_consumer_duty_review_household ON public.consumer_duty_review U
 
 
 --
+-- Name: idx_dfm_recommendation_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dfm_recommendation_firm ON public.dfm_recommendation USING btree (firm_id);
+
+
+--
+-- Name: idx_dfm_recommendation_household; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dfm_recommendation_household ON public.dfm_recommendation USING btree (household_id);
+
+
+--
 -- Name: idx_entity_firm; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2219,6 +2313,20 @@ CREATE INDEX idx_holding_account_date ON public.holding USING btree (account_id,
 --
 
 CREATE INDEX idx_holding_asset_date ON public.holding USING btree (asset_id, as_of_date DESC);
+
+
+--
+-- Name: idx_household_action_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_household_action_firm ON public.household_action USING btree (firm_id);
+
+
+--
+-- Name: idx_household_action_household; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_household_action_household ON public.household_action USING btree (household_id);
 
 
 --
@@ -2439,6 +2547,13 @@ CREATE TRIGGER trg_audit_consumer_duty_review AFTER INSERT OR DELETE OR UPDATE O
 
 
 --
+-- Name: dfm_recommendation trg_audit_dfm_recommendation; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_audit_dfm_recommendation AFTER INSERT OR DELETE OR UPDATE ON public.dfm_recommendation FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
+
+
+--
 -- Name: entity trg_audit_entity; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -2499,6 +2614,13 @@ CREATE TRIGGER trg_audit_holding AFTER INSERT OR DELETE OR UPDATE ON public.hold
 --
 
 CREATE TRIGGER trg_audit_household AFTER INSERT OR DELETE OR UPDATE ON public.household FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
+
+
+--
+-- Name: household_action trg_audit_household_action; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_audit_household_action AFTER INSERT OR DELETE OR UPDATE ON public.household_action FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
 
 
 --
@@ -2967,6 +3089,30 @@ ALTER TABLE ONLY public.consumer_duty_review
 
 
 --
+-- Name: dfm_recommendation dfm_recommendation_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dfm_recommendation
+    ADD CONSTRAINT dfm_recommendation_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.app_user(id);
+
+
+--
+-- Name: dfm_recommendation dfm_recommendation_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dfm_recommendation
+    ADD CONSTRAINT dfm_recommendation_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: dfm_recommendation dfm_recommendation_household_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dfm_recommendation
+    ADD CONSTRAINT dfm_recommendation_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
+
+
+--
 -- Name: entity entity_base_currency_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3204,6 +3350,30 @@ ALTER TABLE ONLY public.holding
 
 ALTER TABLE ONLY public.holding
     ADD CONSTRAINT holding_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: household_action household_action_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.household_action
+    ADD CONSTRAINT household_action_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: household_action household_action_household_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.household_action
+    ADD CONSTRAINT household_action_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
+
+
+--
+-- Name: household_action household_action_selected_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.household_action
+    ADD CONSTRAINT household_action_selected_by_fkey FOREIGN KEY (selected_by) REFERENCES public.app_user(id);
 
 
 --
@@ -3537,6 +3707,12 @@ ALTER TABLE public.compliance_provider_actions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.consumer_duty_review ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: dfm_recommendation; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.dfm_recommendation ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: entity; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -3595,6 +3771,12 @@ ALTER TABLE public.holding ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE public.household ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: household_action; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.household_action ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: household_member; Type: ROW SECURITY; Schema: public; Owner: -
@@ -3740,6 +3922,13 @@ CREATE POLICY tenant_isolation_consumer_duty_review ON public.consumer_duty_revi
 
 
 --
+-- Name: dfm_recommendation tenant_isolation_dfm_recommendation; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_dfm_recommendation ON public.dfm_recommendation USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
 -- Name: entity tenant_isolation_entity; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -3807,6 +3996,13 @@ CREATE POLICY tenant_isolation_holding ON public.holding USING ((firm_id = (NULL
 --
 
 CREATE POLICY tenant_isolation_household ON public.household USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
+-- Name: household_action tenant_isolation_household_action; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_household_action ON public.household_action USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
 
 
 --
@@ -3903,5 +4099,5 @@ ALTER TABLE public.transaction ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict vOWhVEOJa8meJYO00rzfZJaDd58WBUFUvzfxq5dOATqGLnu6jKaBNZJBzGHQci7
+\unrestrict olmnicXygm7MM2XszUwgew0LETjy4daWI8t2KcZ4xzwJhM0re3YHuB577xY2Bdv
 

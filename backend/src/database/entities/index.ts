@@ -34,3 +34,5 @@ export * from './report-case.entity';
 export * from './charge-projection.entity';
 export * from './retirement-cashflow-scenario.entity';
 export * from './consumer-duty-review.entity';
+export * from './dfm-recommendation.entity';
+export * from './household-action.entity';

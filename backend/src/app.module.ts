@@ -50,6 +50,8 @@ import { HouseholdJourneyModule } from './services/household-journey/household-j
 import { PortfolioLookThroughModule } from './services/portfolio-lookthrough/portfolio-lookthrough.module';
 import { RetirementCashflowModule } from './services/retirement-cashflow/retirement-cashflow.module';
 import { ConsumerDutyModule } from './services/consumer-duty/consumer-duty.module';
+import { DfmRecommendationModule } from './services/dfm-recommendation/dfm-recommendation.module';
+import { ClientActionModule } from './services/client-action/client-action.module';
 
 import { AiModule } from './ai/ai.module';
 
@@ -103,6 +105,8 @@ import { AiModule } from './ai/ai.module';
     PortfolioLookThroughModule,
     RetirementCashflowModule,
     ConsumerDutyModule,
+    DfmRecommendationModule,
+    ClientActionModule,
 
     AiModule,
   ],

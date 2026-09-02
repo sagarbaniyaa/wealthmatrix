@@ -548,6 +548,65 @@ export interface ConsumerDutyReview {
   createdAt: string;
 }
 
+// DFM + Fund Category Recommendation Engine
+
+export interface DfmInputs {
+  riskCategory: string | null;
+  objectives: string[];
+  timeHorizonYears: number | null;
+  timeHorizonSource: string;
+  liquidityNeed: 'low' | 'medium' | 'high' | 'not stated';
+  prefersPassive: boolean | null;
+  prefersActive: boolean | null;
+}
+export interface FundCategoryWeight { category: string; weightPct: number }
+export interface DfmRecommendation {
+  id: string;
+  householdId: string;
+  inputs: DfmInputs;
+  mandate: string;
+  riskAlignment: string | null;
+  reasoning: string[];
+  indicativeFeeRange: string | null;
+  fundCategories: FundCategoryWeight[];
+  gaps: string[];
+  aiNarrative: string | null;
+  aiNarrativeError: string | null;
+  createdAt: string;
+}
+
+// Client Action Selector
+
+export type ActionType =
+  | 'pension_transfer' | 'investment_review' | 'new_investment' | 'dfm_recommendation'
+  | 'isa_gia_setup' | 'retirement_planning' | 'consolidation' | 'protection_review';
+
+export interface ActionOption { actionType: ActionType; label: string }
+
+export interface HouseholdAction {
+  id: string;
+  householdId: string;
+  actionType: ActionType;
+  notes: string | null;
+  selectedBy: string | null;
+  createdAt: string;
+}
+
+export interface ActionChecklistDocument { type: string; label: string; satisfied: boolean; latestFileName: string | null; extractionStatus: string | null }
+export interface ActionChecklistCheck { key: string; label: string; satisfied: boolean; detail: string }
+export interface ActionChecklist {
+  actionType: ActionType;
+  label: string;
+  notes: string | null;
+  selectedAt: string;
+  documents: ActionChecklistDocument[];
+  complianceChecks: ActionChecklistCheck[];
+  suitability: { sectionLabel: string; templateFound: boolean; templateId: string | null; reportCaseId: string | null; reportCaseStatus: string | null };
+  provider: { required: boolean; hasAction: boolean; latestStatus: string | null };
+  dfm: { relevant: boolean; hasRecommendation: boolean; latestMandate: string | null };
+  loa: { hasActiveTemplate: boolean };
+}
+
 // Report Template Builder
 
 export interface ReportTemplate {

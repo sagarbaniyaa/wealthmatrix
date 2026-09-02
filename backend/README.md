@@ -152,6 +152,28 @@ is the load-bearing piece of this backend — read
   fails (`extraction_status`: pending/processing/done/failed/unsupported)
   — see the frontend README's Document Intake section for the known
   scanned-PDF gap and the upload UI.
+- `services/dfm-recommendation` — deterministic DFM mandate + fund
+  category recommendation engine. Never names a real regulated DFM firm
+  (no due-diligence/fee-panel relationship exists to back that) — outputs
+  a mandate TYPE (e.g. "Balanced Growth Mandate") and a fund-category
+  allocation (Global Equity/Multi-Asset/etc., no fund licensing needed)
+  from a fixed rules table keyed on the household's ATR risk category,
+  adjusted for stated liquidity need and investment style. Claude only
+  polishes the already-computed numbers into a suitability paragraph
+  (same compute-then-narrate-with-graceful-fallback shape as
+  ChargeProjectionService) — never invents the mandate or weights
+  itself. Append-only (`dfm_recommendation`, migration 011).
+- `services/client-action` — the "What are we doing for this client?"
+  selector (spec: Pension Transfer/Investment Review/New Investment/DFM
+  Recommendation/ISA-GIA Setup/Retirement Planning/Consolidation/
+  Protection Review). Selecting an action doesn't create new data — it
+  picks a fixed requirements table (`action-requirements.constants.ts`)
+  to check LIVE against every other module's real data: uploaded
+  documents, Fact Find completion/risk profile, Charge Projections,
+  Consumer Duty reviews, matching Report Templates/Cases, provider send
+  status, DFM recommendations, and LOA template availability. Nothing is
+  auto-marked "done" without a real underlying record — see
+  `getChecklist()`. Append-only history (`household_action`, migration 012).
 - `modules/consumer-duty`, `services/consumer-duty` — FCA Consumer Duty
   (PRIN 2A) monitoring. Vulnerability is NOT a new data model: it's read
   straight off each household's latest `fact_find.personal_circumstances`

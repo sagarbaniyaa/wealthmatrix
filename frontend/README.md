@@ -481,6 +481,42 @@ the file, no separate "process" step:
   on first use per process, so the very first OCR request after a
   Render free-tier cold start is noticeably slower than a warm one.
 
+### DFM & Fund Category Recommendation
+
+**`/advisor/households/[id]/dfm-recommendation`** — a deterministic
+mandate + fund-category allocation computed from the household's latest
+Fact Find (risk category, objectives, time horizon, liquidity need,
+investment style). **No real DFM firm is named** — the platform has no
+due-diligence/fee-panel relationship with any actual discretionary fund
+manager to responsibly recommend one by name, so the output is a mandate
+TYPE ("Balanced Growth Mandate") and a category allocation (Global
+Equity, Multi-Asset, Corporate Bond, Index Funds, Diversified Growth,
+Alternatives, Cash, Short-Duration Bonds — no fund licensing needed).
+The mandate/weights are looked up from a fixed rules table by risk
+band, then adjusted for stated liquidity need and passive/active
+preference — entirely deterministic and re-derivable by hand. Claude is
+used only to turn the already-computed numbers into one polished
+suitability paragraph; if that fails, the numbers and reasoning still
+show, with the AI failure flagged rather than hidden. Missing inputs
+(no risk category, no stated horizon) show up as explicit "gaps" rather
+than being silently defaulted.
+
+### Client Action
+
+**`/advisor/households/[id]/action`** — "What are we doing for this
+client?" Pick from the 8 standard actions (Pension Transfer, Investment
+Review, New Investment, DFM Recommendation, ISA/GIA Setup, Retirement
+Planning, Consolidation, Protection Review) and the page turns into a
+live checklist: required documents (cross-checked against Document
+Intake), compliance checks (Fact Find completion, risk profile, Charge
+Projections, Consumer Duty reviews), whether a matching suitability
+template/report case exists, provider send status, whether a DFM
+recommendation exists (where relevant), and LOA template availability —
+each pulled live from the actual other feature, never a separately
+maintained "done" flag. Selecting an action is itself kept as history
+(a household's workstream changes over time), so past selections stay
+visible even after the current one changes.
+
 ### Consumer Duty register
 
 **`/advisor/compliance/consumer-duty`** (firm-wide) and
