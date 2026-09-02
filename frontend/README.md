@@ -481,6 +481,33 @@ the file, no separate "process" step:
   on first use per process, so the very first OCR request after a
   Render free-tier cold start is noticeably slower than a warm one.
 
+### Email Sync
+
+**`/advisor/settings/email`** — connect your own mailbox so the platform
+detects a provider's reply automatically instead of you watching your
+inbox and re-uploading attachments by hand.
+
+- **IMAP with an app-specific password, not "Sign in with Google/
+  Microsoft"**: real OAuth would require registering a developer app in
+  Google Cloud Console or Azure first — a genuine account-setup step
+  outside what this platform can or should do silently on your behalf.
+  An app password (Gmail: Account → Security → 2-Step Verification →
+  App passwords; Outlook/Microsoft 365: account security settings) works
+  immediately, with presets for Gmail/Outlook/Yahoo host+port.
+- **Reply matching uses a reference code**, not email threading: every
+  LOA send now includes `Ref: XXXXXXXX` in its subject and body — Email
+  Sync greps incoming unread mail for that same code to know exactly
+  which household/provider action a reply belongs to, since not every
+  provider's mail system preserves threading headers reliably.
+- **Every attachment on a matched reply runs through Document Intake**
+  — the identical pipeline a manual upload uses (OCR/NLP extraction,
+  identity fields, summarised notes for anything not safe to auto-write)
+  — and the provider action flips to RECEIVED automatically.
+- Polled automatically every 10 minutes, or immediately via "Check for
+  replies now" (useful right after you know a reply has landed, or
+  while testing).
+- Credentials are encrypted at rest, never shown again after saving.
+
 ### DFM & Fund Category Recommendation
 
 **`/advisor/households/[id]/dfm-recommendation`** — a deterministic

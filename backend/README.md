@@ -152,6 +152,25 @@ is the load-bearing piece of this backend — read
   fails (`extraction_status`: pending/processing/done/failed/unsupported)
   — see the frontend README's Document Intake section for the known
   scanned-PDF gap and the upload UI.
+- `services/email-ingestion` — reads provider replies from an adviser's
+  own mailbox via IMAP + an app-specific password (not full OAuth/Gmail
+  API/Microsoft Graph, which would need a Google Cloud/Azure developer
+  app registered first — an app password connects immediately, at the
+  cost of polling every 10 minutes instead of an instant push). A reply
+  is matched to the right `compliance_provider_actions` row via a
+  reference code embedded in the ORIGINAL outbound subject/body
+  (`ProviderSendService` now puts `Ref: <first 8 hex chars of the
+  action's own id>` in every send) — not by trusting the provider to
+  preserve email threading headers. Every attachment on a matched reply
+  goes through the exact same Document Intake pipeline as a manual
+  upload (`DocumentIntakeService`, migration 010) — this is deliberately
+  not a second extraction path. A match flips the action to RECEIVED and
+  writes a `compliance_log` entry either way. Credentials are encrypted
+  at rest (`CredentialCipherService`, AES-256-GCM, `ENCRYPTION_KEY` env)
+  — see `common/database/run-in-tenant-context.ts` for how the `@Cron`
+  poller gets a correctly tenant-scoped `EntityManager` despite having
+  no HTTP request behind it (it loops every firm via the RLS-exempt
+  `firm` table, then opens a proper tenant transaction per firm).
 - `services/dfm-recommendation` — deterministic DFM mandate + fund
   category recommendation engine. Never names a real regulated DFM firm
   (no due-diligence/fee-panel relationship exists to back that) — outputs

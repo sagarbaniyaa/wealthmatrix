@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { TenantContext } from '../../common/database/tenant-context';
 import { ComplianceProviderActionEntity } from '../../database/entities';
 import { ProviderActionStatus } from '../../common/enums/domain.enums';
@@ -74,6 +75,14 @@ export class ProviderSendService {
 
     const documentsSent = built.manifest.filter((m) => m.included).map((m) => ({ documentType: m.documentType, fileName: m.fileName }));
 
+    // Generated up front (not left to the DB default) so it can go in the
+    // outbound subject line as a matchable reference — EmailIngestionService
+    // greps incoming replies for "Ref: <first 8 hex chars>" to reliably
+    // correlate a reply back to this exact action, without depending on
+    // the provider preserving email threading/In-Reply-To headers.
+    const actionId = randomUUID();
+    const referenceCode = actionId.slice(0, 8);
+
     let emailStatus: ProviderActionStatus = ProviderActionStatus.PENDING;
     let emailError: string | null = null;
     let sentAt: Date | null = null;
@@ -81,8 +90,8 @@ export class ProviderSendService {
     try {
       await this.mailer.send({
         to: provider.providerEmail,
-        subject: `LOA + Client Pack – Household ${params.householdId} – WealthMatrix`,
-        body: buildEmailBody(provider.providerName),
+        subject: `LOA + Client Pack – Household ${params.householdId} – WealthMatrix (Ref: ${referenceCode})`,
+        body: buildEmailBody(provider.providerName, referenceCode),
         attachments: [{ filename: 'provider_pack.zip', content: built.zip, contentType: 'application/zip' }],
       });
       emailStatus = ProviderActionStatus.SENT;
@@ -93,6 +102,7 @@ export class ProviderSendService {
     }
 
     const action = this.actionsRepo.create({
+      id: actionId,
       firmId: TenantContext.getFirmId(),
       householdId: params.householdId,
       providerId: params.providerId,
@@ -110,7 +120,7 @@ export class ProviderSendService {
   }
 }
 
-function buildEmailBody(providerName: string): string {
+function buildEmailBody(providerName: string, referenceCode: string): string {
   // Adviser name/FCA number aren't threaded through here as literally as
   // the spec's template — they're already on the adviser_details.pdf and
   // LOA inside the attached pack; keeping the email body itself generic
@@ -121,6 +131,8 @@ function buildEmailBody(providerName: string): string {
     'Please find attached the LOA and full client information pack.',
     '',
     'Adviser and client details are included in the attached documents (adviser_details.pdf, fact_find.pdf, LOA).',
+    '',
+    `Please quote Ref: ${referenceCode} in your reply — it lets our system match your response to this case automatically.`,
     '',
     'Kindly confirm receipt.',
     '',

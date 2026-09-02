@@ -607,6 +607,25 @@ export interface ActionChecklist {
   loa: { hasActiveTemplate: boolean };
 }
 
+// Email Integration (provider replies)
+
+export interface EmailConnectionStatus {
+  connected: boolean;
+  imapHost: string | null;
+  username: string | null;
+  status: 'pending' | 'connected' | 'error' | null;
+  lastError: string | null;
+  lastPolledAt: string | null;
+}
+
+export interface EmailPollMatch { actionId: string; householdId: string; documentsAdded: number }
+export interface EmailPollResult {
+  messagesScanned: number;
+  matched: EmailPollMatch[];
+  unmatched: number;
+  error: string | null;
+}
+
 // Report Template Builder
 
 export interface ReportTemplate {

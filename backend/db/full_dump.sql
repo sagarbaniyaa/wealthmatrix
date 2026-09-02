@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict olmnicXygm7MM2XszUwgew0LETjy4daWI8t2KcZ4xzwJhM0re3YHuB577xY2Bdv
+\restrict C9A7i6LWN7pWG3USwyzNSoXl6j8WfMh8dNSfi6zfhl7CXQ9b6kvT9t1AoafLdPd
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -231,6 +231,29 @@ CREATE TABLE public.account (
 );
 
 ALTER TABLE ONLY public.account FORCE ROW LEVEL SECURITY;
+
+
+--
+-- Name: adviser_email_connection; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.adviser_email_connection (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    adviser_id uuid NOT NULL,
+    imap_host text NOT NULL,
+    imap_port integer DEFAULT 993 NOT NULL,
+    imap_secure boolean DEFAULT true NOT NULL,
+    username text NOT NULL,
+    encrypted_password text NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    last_error text,
+    last_polled_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.adviser_email_connection FORCE ROW LEVEL SECURITY;
 
 
 --
@@ -1054,6 +1077,14 @@ ef9f2608-21cf-4bfc-bac6-f12680798af0	524e600b-d62d-469d-b697-22ced0fbcc07	\N	a84
 
 
 --
+-- Data for Name: adviser_email_connection; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.adviser_email_connection (id, firm_id, adviser_id, imap_host, imap_port, imap_secure, username, encrypted_password, status, last_error, last_polled_at, created_at, updated_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: adviser_household_assignment; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -1673,6 +1704,22 @@ ALTER TABLE ONLY public.account
 
 
 --
+-- Name: adviser_email_connection adviser_email_connection_adviser_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.adviser_email_connection
+    ADD CONSTRAINT adviser_email_connection_adviser_id_key UNIQUE (adviser_id);
+
+
+--
+-- Name: adviser_email_connection adviser_email_connection_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.adviser_email_connection
+    ADD CONSTRAINT adviser_email_connection_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: adviser_household_assignment adviser_household_assignment_adviser_id_household_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2075,6 +2122,13 @@ CREATE INDEX idx_account_owner_entity ON public.account USING btree (owner_entit
 --
 
 CREATE INDEX idx_account_owner_person ON public.account USING btree (owner_person_id) WHERE (owner_person_id IS NOT NULL);
+
+
+--
+-- Name: idx_adviser_email_connection_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_adviser_email_connection_firm ON public.adviser_email_connection USING btree (firm_id);
 
 
 --
@@ -2715,6 +2769,13 @@ CREATE TRIGGER trg_updated_at_account BEFORE UPDATE ON public.account FOR EACH R
 
 
 --
+-- Name: adviser_email_connection trg_updated_at_adviser_email_connection; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_updated_at_adviser_email_connection BEFORE UPDATE ON public.adviser_email_connection FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
 -- Name: app_user trg_updated_at_app_user; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -2870,6 +2931,22 @@ ALTER TABLE ONLY public.account
 
 ALTER TABLE ONLY public.account
     ADD CONSTRAINT account_owner_person_id_fkey FOREIGN KEY (owner_person_id) REFERENCES public.person(id);
+
+
+--
+-- Name: adviser_email_connection adviser_email_connection_adviser_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.adviser_email_connection
+    ADD CONSTRAINT adviser_email_connection_adviser_id_fkey FOREIGN KEY (adviser_id) REFERENCES public.app_user(id) ON DELETE CASCADE;
+
+
+--
+-- Name: adviser_email_connection adviser_email_connection_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.adviser_email_connection
+    ADD CONSTRAINT adviser_email_connection_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
 
 
 --
@@ -3647,6 +3724,12 @@ ALTER TABLE ONLY public.transaction
 ALTER TABLE public.account ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: adviser_email_connection; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.adviser_email_connection ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: adviser_household_assignment; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -3849,6 +3932,13 @@ ALTER TABLE public.structure_version ENABLE ROW LEVEL SECURITY;
 --
 
 CREATE POLICY tenant_isolation_account ON public.account USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
+-- Name: adviser_email_connection tenant_isolation_adviser_email_connection; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_adviser_email_connection ON public.adviser_email_connection USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
 
 
 --
@@ -4099,5 +4189,5 @@ ALTER TABLE public.transaction ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict olmnicXygm7MM2XszUwgew0LETjy4daWI8t2KcZ4xzwJhM0re3YHuB577xY2Bdv
+\unrestrict C9A7i6LWN7pWG3USwyzNSoXl6j8WfMh8dNSfi6zfhl7CXQ9b6kvT9t1AoafLdPd
 
