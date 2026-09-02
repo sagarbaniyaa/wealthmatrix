@@ -23,6 +23,9 @@ export default async function CompliancePage() {
         title="Compliance log"
         action={
           <div className="flex items-center gap-3">
+            <Link href="/advisor/compliance/consumer-duty">
+              <Button variant="ghost">Consumer Duty register →</Button>
+            </Link>
             <ComplianceScanButton />
             <Link href="/print/compliance" target="_blank">
               <Button variant="ghost">Export to PDF →</Button>

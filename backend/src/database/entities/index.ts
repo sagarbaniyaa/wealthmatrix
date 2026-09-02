@@ -33,3 +33,4 @@ export * from './report-template.entity';
 export * from './report-case.entity';
 export * from './charge-projection.entity';
 export * from './retirement-cashflow-scenario.entity';
+export * from './consumer-duty-review.entity';

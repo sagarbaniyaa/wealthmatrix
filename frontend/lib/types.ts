@@ -478,6 +478,67 @@ export interface ChargeProjection {
   updatedAt: string;
 }
 
+// Consumer Duty monitoring
+
+export type ConsumerDutyOutcomeStatus = 'met' | 'concern' | 'not_assessed';
+
+export interface VulnerabilityFlag { key: string; label: string; detail: string }
+
+export interface ConsumerDutyRegisterRow {
+  householdId: string;
+  householdName: string;
+  isVulnerable: boolean;
+  vulnerabilityFlags: VulnerabilityFlag[];
+  supportDocumented: boolean;
+  latestFactFindCompletedOn: string | null;
+  reviewAgeDays: number | null;
+  reviewOverdue: boolean;
+  latestOutcomeReview: {
+    reviewDate: string;
+    priceValueOutcome: ConsumerDutyOutcomeStatus;
+    productsServicesOutcome: ConsumerDutyOutcomeStatus;
+    understandingOutcome: ConsumerDutyOutcomeStatus;
+    supportOutcome: ConsumerDutyOutcomeStatus;
+  } | null;
+  outcomesFullyAssessed: boolean;
+}
+
+export interface ConsumerDutyRegister {
+  generatedAt: string;
+  reviewCycleDays: number;
+  households: ConsumerDutyRegisterRow[];
+  summary: {
+    totalHouseholds: number;
+    vulnerableCount: number;
+    vulnerableWithoutDocumentedSupport: number;
+    reviewOverdueCount: number;
+    outcomesNeverAssessedCount: number;
+  };
+}
+
+export interface ConsumerDutyHouseholdDetail {
+  vulnerabilityFlags: VulnerabilityFlag[];
+  supportDocumented: boolean;
+  history: ConsumerDutyReview[];
+}
+
+export interface ConsumerDutyReview {
+  id: string;
+  householdId: string;
+  reviewedBy: string | null;
+  reviewDate: string;
+  priceValueOutcome: ConsumerDutyOutcomeStatus;
+  priceValueNotes: string | null;
+  productsServicesOutcome: ConsumerDutyOutcomeStatus;
+  productsServicesNotes: string | null;
+  understandingOutcome: ConsumerDutyOutcomeStatus;
+  understandingNotes: string | null;
+  supportOutcome: ConsumerDutyOutcomeStatus;
+  supportNotes: string | null;
+  overallNotes: string | null;
+  createdAt: string;
+}
+
 // Report Template Builder
 
 export interface ReportTemplate {

@@ -53,6 +53,9 @@ export default async function HouseholdDetailPage({ params }: { params: { househ
             <Link href={`/advisor/households/${household.id}/provider-hub`} className="text-sm text-brass-400 hover:text-brass-300">
               Provider Hub →
             </Link>
+            <Link href={`/advisor/households/${household.id}/consumer-duty`} className="text-sm text-brass-400 hover:text-brass-300">
+              Consumer Duty →
+            </Link>
           </div>
         }
       />

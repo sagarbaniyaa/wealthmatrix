@@ -440,6 +440,39 @@ through the plan-to age) and a 10th/50th/90th percentile fan chart
   by 95, p50 lands at ~£480k, p90 at ~£2.9m) in well under a second for
   all 2,000 simulations.
 
+### Consumer Duty register
+
+**`/advisor/compliance/consumer-duty`** (firm-wide) and
+**`/advisor/households/[id]/consumer-duty`** (per household) — FCA
+Consumer Duty (PRIN 2A) monitoring, built entirely from data the
+platform already holds honestly rather than a fabricated compliance
+score:
+
+- **Vulnerability** is read straight off each household's latest Fact
+  Find (`personal_circumstances`: health status, affects-understanding,
+  needs-additional-support, vulnerability notes) — nothing new to fill
+  in, this dashboard just surfaces what's already been declared,
+  firm-wide, sorted vulnerable-first.
+- **"Support documented"** specifically checks that
+  `additionalSupportProvided` was actually filled in whenever
+  `needsAdditionalSupport` is true — flags the gap between "we know this
+  client is vulnerable" and "we can evidence we did something about it",
+  which is the actual regulatory distinction that matters.
+- **Review currency**: a household with no completed Fact Find in the
+  last 365 days shows as overdue. Fixed cycle, not a regulatory citation
+  — a firm with a different service proposition would want this
+  configurable.
+- **The four Consumer Duty outcomes** (price & value, products &
+  services, consumer understanding, consumer support) are a dated
+  adviser attestation, not an auto-score — deliberately. The platform
+  doesn't hold real fee-benchmarking or target-market data, so scoring
+  "price & value" automatically would misrepresent what's actually been
+  evidenced; an adviser records "met"/"concern"/"not assessed" with
+  notes per outcome instead, and every attestation is kept (append-only)
+  as its own evidence trail rather than overwritten.
+- Same access scoping as the household list itself: admin sees the
+  firm's whole book, an adviser sees only their assigned households.
+
 ## Architecture
 
 **Token handling.** The backend issues a bearer JWT; this frontend never

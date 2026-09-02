@@ -133,6 +133,23 @@ is the load-bearing piece of this backend — read
   recalculated per view). See the frontend README's Retirement Cashflow
   Monte Carlo section for the full methodology.
 
+- `modules/consumer-duty`, `services/consumer-duty` — FCA Consumer Duty
+  (PRIN 2A) monitoring. Vulnerability is NOT a new data model: it's read
+  straight off each household's latest `fact_find.personal_circumstances`
+  (health status, affects-understanding, needs-additional-support,
+  vulnerability notes — already captured by the Fact Find). The four
+  Consumer Duty outcomes (price & value, products & services, consumer
+  understanding, consumer support) are a separate, append-only, dated
+  adviser attestation (`consumer_duty_review`, migration 009) — the
+  service deliberately does not compute an automatic score for price &
+  value or products & services, since the platform holds no real fee-
+  benchmarking or target-market data to score them honestly from; an
+  outcome is either a genuine dated "met"/"concern" call or shows
+  plainly as "not assessed". `GET consumer-duty` is the firm-wide
+  register (scoped the same way `findAllForUser` scopes the household
+  list); `GET/POST households/:householdId/consumer-duty` is the
+  household-level read-off + review history.
+
 ## Running it
 
 ```bash
