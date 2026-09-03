@@ -91,6 +91,11 @@ export enum ClientDocumentType {
   RISK_PROFILE = 'RISK_PROFILE',
   FILE_NOTE = 'FILE_NOTE',
   PROVIDER_STATEMENT = 'PROVIDER_STATEMENT',
+  // Live Client Call — see services/call-session. A call transcript is
+  // routed through the exact same extraction path as FACT_FIND_SOURCE
+  // (DocumentIntakeService), just labelled distinctly so the Documents
+  // page and the client's file show it for what it actually is.
+  CALL_TRANSCRIPT = 'CALL_TRANSCRIPT',
 }
 
 // Docs the adviser must actually upload themselves — we can't legitimately
@@ -106,6 +111,7 @@ export const UPLOADABLE_DOCUMENT_TYPES = [
   ClientDocumentType.RISK_PROFILE,
   ClientDocumentType.FILE_NOTE,
   ClientDocumentType.PROVIDER_STATEMENT,
+  ClientDocumentType.CALL_TRANSCRIPT,
 ] as const;
 
 // The subset that Document Intake actually runs OCR/NLP extraction
@@ -124,6 +130,7 @@ export const EXTRACTABLE_DOCUMENT_TYPES = [
   ClientDocumentType.FILE_NOTE,
   ClientDocumentType.BANK_STATEMENT,
   ClientDocumentType.PROVIDER_STATEMENT,
+  ClientDocumentType.CALL_TRANSCRIPT,
 ] as const;
 
 export enum ProviderActionStatus {

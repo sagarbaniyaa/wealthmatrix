@@ -339,7 +339,7 @@ export interface LoaTemplate {
 
 export type UploadableDocumentType =
   | 'KYC' | 'ID_PROOF' | 'ADDRESS_PROOF' | 'BANK_STATEMENT'
-  | 'FACT_FIND_SOURCE' | 'RISK_PROFILE' | 'FILE_NOTE' | 'PROVIDER_STATEMENT';
+  | 'FACT_FIND_SOURCE' | 'RISK_PROFILE' | 'FILE_NOTE' | 'PROVIDER_STATEMENT' | 'CALL_TRANSCRIPT';
 export type ClientDocumentType = UploadableDocumentType | 'LOA' | 'FACT_FIND' | 'POLICY_SUMMARY' | 'ADVISER_DETAILS';
 
 export type DocumentExtractionStatus = 'pending' | 'processing' | 'done' | 'failed' | 'unsupported';

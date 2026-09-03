@@ -171,6 +171,30 @@ is the load-bearing piece of this backend — read
   poller gets a correctly tenant-scoped `EntityManager` despite having
   no HTTP request behind it (it loops every firm via the RLS-exempt
   `firm` table, then opens a proper tenant transaction per firm).
+- `services/call-session` — "Start Client Call". Two deliberately
+  separate pieces:
+  1. **Live suggestions** (`call-suggestion.constants.ts` +
+     `getSuggestions()`) — deterministic keyword matching over the
+     running transcript, not an AI call, so it can react instantly and
+     for free while the adviser is mid-conversation. Each trigger
+     points at a real page already built elsewhere on this platform
+     (Client Action, CGT Analysis, Retirement Cashflow, Provider Hub,
+     DFM Recommendation, Fact Find) — this is a router, not a new
+     source of advice.
+  2. **"End Call"** (`finishCall()`) — the full transcript is saved as a
+     `CALL_TRANSCRIPT` client document and routed through the EXACT SAME
+     Document Intake pipeline (migration 010) a manually uploaded Fact
+     Find document uses — no second extraction engine. `FactFindParserService`
+     was extended (three new optional fields: `lifeEvents`, `taxConcerns`,
+     `riskBehaviourNotes`, folded into `personalCircumstances` — no schema
+     change) rather than duplicated, since a call transcript and meeting
+     notes are the same kind of input to that engine.
+  There is deliberately no audio recording/storage — the frontend uses
+  the browser's own free, built-in speech recognition to produce a live
+  TEXT transcript, which sidesteps both a paid transcription API's cost
+  and the extra data-protection burden of retaining an actual voice
+  recording, while still giving a searchable, timestamped compliance
+  record.
 - `services/cgt-intelligence` — CGT & Portfolio Intelligence. Analyses a
   household's PERSONALLY-held investment accounts (entity/trust-held
   assets are out of scope — their CGT treatment is genuinely different

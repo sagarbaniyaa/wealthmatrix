@@ -9,6 +9,7 @@ import type { ClientDocument, UploadableDocumentType, DocumentExtractionStatus }
 
 const INTAKE_TYPES: { type: UploadableDocumentType; label: string; help: string }[] = [
   { type: 'FACT_FIND_SOURCE', label: 'Fact Find', help: 'A completed fact-find (PDF, DOCX, or a photo of a paper form) — auto-fills the client record and creates a draft Fact Find.' },
+  { type: 'CALL_TRANSCRIPT', label: 'Call Transcript', help: 'Usually created automatically via "Start Client Call" — a .txt transcript can also be uploaded here directly. Same auto-fill as Fact Find.' },
   { type: 'RISK_PROFILE', label: 'Risk Profile', help: 'A risk-profiling questionnaire or report — summarised for adviser review.' },
   { type: 'KYC', label: 'KYC', help: 'A KYC document — identity fields are filled onto the client record.' },
   { type: 'ID_PROOF', label: 'ID', help: 'Passport/driving licence — identity fields are filled onto the client record.' },
@@ -74,7 +75,7 @@ export function DocumentIntakeClient({ householdId, initialDocuments }: { househ
                 <label className="cursor-pointer text-xs text-brass-400 hover:text-brass-300">
                   {uploadingType === type ? 'Uploading + extracting…' : 'Upload'}
                   <input
-                    type="file" accept=".pdf,.docx,.png,.jpg,.jpeg,.webp" className="hidden" disabled={uploadingType === type}
+                    type="file" accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.txt" className="hidden" disabled={uploadingType === type}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadDocument(type, f); e.target.value = ''; }}
                   />
                 </label>

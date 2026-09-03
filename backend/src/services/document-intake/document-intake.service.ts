@@ -88,6 +88,7 @@ export class DocumentIntakeService {
     try {
       switch (doc.documentType) {
         case ClientDocumentType.FACT_FIND_SOURCE:
+        case ClientDocumentType.CALL_TRANSCRIPT:
           await this.applyFactFindSource(doc, text, uploadedBy);
           break;
         case ClientDocumentType.KYC:
@@ -124,8 +125,21 @@ export class DocumentIntakeService {
     }
 
     if (factFindResult.parsed) {
-      const { gaps, ...factFindFields } = factFindResult.parsed;
-      const created = await this.factFindService.create(doc.householdId, { status: 'draft', ...factFindFields }, uploadedBy);
+      const { gaps, lifeEvents, taxConcerns, riskBehaviourNotes, ...factFindFields } = factFindResult.parsed;
+      // lifeEvents/taxConcerns/riskBehaviourNotes have no dedicated fact_find
+      // column — folded into personalCircumstances (JSONB, no fixed shape)
+      // rather than adding narrow columns for three call-derived fields.
+      const personalCircumstances = {
+        ...(factFindFields.personalCircumstances as Record<string, unknown> ?? {}),
+        ...(lifeEvents?.length ? { lifeEvents } : {}),
+        ...(taxConcerns ? { taxConcerns } : {}),
+        ...(riskBehaviourNotes ? { riskBehaviourNotes } : {}),
+      };
+      const created = await this.factFindService.create(
+        doc.householdId,
+        { status: 'draft', ...factFindFields, ...(Object.keys(personalCircumstances).length ? { personalCircumstances } : {}) },
+        uploadedBy,
+      );
       appliedParts.push(`Created a draft Fact Find from this document (open it under Fact Finds to review and complete the risk questionnaire + declaration).`);
       if (gaps?.length) {
         appliedParts.push(`Not covered in the document — needs following up: ${gaps.slice(0, 4).join('; ')}${gaps.length > 4 ? '…' : ''}`);

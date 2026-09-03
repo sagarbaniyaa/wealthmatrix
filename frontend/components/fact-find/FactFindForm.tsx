@@ -271,6 +271,24 @@ export function FactFindForm({
               </>
             )}
             <Field label="Vulnerability notes"><TextAreaInput value={personal.vulnerabilityNotes} onChange={(v) => setPersonal((p: any) => ({ ...p, vulnerabilityNotes: v }))} /></Field>
+            {(personal.lifeEvents?.length > 0 || personal.taxConcerns || personal.riskBehaviourNotes) && (
+              <div className="space-y-3 rounded-sm border border-hairline bg-ink-800/50 p-3">
+                <p className="text-xs uppercase tracking-wide text-ink-400">From Client Call / Meeting notes</p>
+                {personal.lifeEvents?.length > 0 && (
+                  <Field label="Life events mentioned">
+                    <TextAreaInput value={personal.lifeEvents.join('\n')} onChange={(v) => setPersonal((p: any) => ({ ...p, lifeEvents: v.split('\n').filter(Boolean) }))} />
+                  </Field>
+                )}
+                {personal.taxConcerns && (
+                  <Field label="Tax concerns raised"><TextAreaInput value={personal.taxConcerns} onChange={(v) => setPersonal((p: any) => ({ ...p, taxConcerns: v }))} /></Field>
+                )}
+                {personal.riskBehaviourNotes && (
+                  <Field label="Risk behaviour (conversational, not the ATR questionnaire)">
+                    <TextAreaInput value={personal.riskBehaviourNotes} onChange={(v) => setPersonal((p: any) => ({ ...p, riskBehaviourNotes: v }))} />
+                  </Field>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <Field label="Smoker?"><YesNoToggle value={personal.smoker} onChange={(v) => setPersonal((p: any) => ({ ...p, smoker: v }))} /></Field>
               <Field label="Marital status">

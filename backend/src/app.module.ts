@@ -54,6 +54,7 @@ import { DfmRecommendationModule } from './services/dfm-recommendation/dfm-recom
 import { ClientActionModule } from './services/client-action/client-action.module';
 import { EmailIngestionModule } from './services/email-ingestion/email-ingestion.module';
 import { CgtIntelligenceModule } from './services/cgt-intelligence/cgt-intelligence.module';
+import { CallSessionModule } from './services/call-session/call-session.module';
 
 import { AiModule } from './ai/ai.module';
 
@@ -111,6 +112,7 @@ import { AiModule } from './ai/ai.module';
     ClientActionModule,
     EmailIngestionModule,
     CgtIntelligenceModule,
+    CallSessionModule,
 
     AiModule,
   ],

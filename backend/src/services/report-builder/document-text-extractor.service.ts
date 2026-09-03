@@ -38,6 +38,12 @@ export class DocumentTextExtractorService {
   private readonly logger = new Logger(DocumentTextExtractorService.name);
 
   async extractText(mimeType: string, fileData: Buffer): Promise<string> {
+    // Live Client Call transcripts arrive as plain text (see
+    // services/call-session) — no parsing needed, just decode.
+    if (mimeType.startsWith('text/')) {
+      return fileData.toString('utf8').trim();
+    }
+
     if (mimeType === DOCX_MIME) {
       const result = await mammoth.extractRawText({ buffer: fileData });
       return result.value.trim();

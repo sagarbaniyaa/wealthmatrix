@@ -10,6 +10,9 @@ export interface ParsedFactFind {
   insurance?: Record<string, unknown>;
   investmentQuestions?: Record<string, unknown>;
   retirementQuestions?: Record<string, unknown>;
+  lifeEvents?: string[];
+  taxConcerns?: string;
+  riskBehaviourNotes?: string;
   gaps: string[];
 }
 
@@ -56,6 +59,14 @@ export class FactFindParserService {
           '  "investmentQuestions": { "hasOtherAdvisor": boolean, "investmentObjectives": string, ' +
           '"prefersPassive": boolean, "prefersActive": boolean },\n' +
           '  "retirementQuestions": { "minMonthlyIncomeRequirement": string, "pensionIntention": string },\n' +
+          '  "lifeEvents": string[] — significant life events mentioned (e.g. "Getting married next year", ' +
+          '"Recently inherited a property", "Changing jobs in March"),\n' +
+          '  "taxConcerns": string — any tax worries or questions the client raised (CGT, IHT, income tax) in ' +
+          'their own words, or omit if none mentioned,\n' +
+          '  "riskBehaviourNotes": string — how the client TALKED about risk/losses/volatility in their own ' +
+          'words (e.g. "said they panicked and sold everything in 2020"), purely descriptive. This is NEVER a ' +
+          'substitute for the formal Attitude-to-Risk questionnaire, which still needs the client\'s own direct ' +
+          'answers — this field exists only so the adviser has the conversational context on hand,\n' +
           '  "gaps": string[] — a plain-English list of important Fact Find information the notes did NOT ' +
           'cover, that the adviser should follow up on (e.g. "Date of birth not mentioned", "No mention of ' +
           'existing pension arrangements")\n' +

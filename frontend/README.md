@@ -508,6 +508,37 @@ inbox and re-uploading attachments by hand.
   while testing).
 - Credentials are encrypted at rest, never shown again after saving.
 
+### Client Call
+
+**`/advisor/households/[id]/call`** — click "Start Client Call" and talk
+naturally; a live transcript builds on screen and suggestion cards
+appear as topics come up (mention a pension transfer, an ISA, CGT
+worries, income needs, risk concerns, consolidating old plans,
+retirement, protection, or managed investing, and the matching page
+opens one click away). Click "End Call & Update Fact Find" and the
+transcript is processed exactly like an uploaded Fact Find document —
+identity fields and a draft Fact Find are created automatically, no
+manual typing.
+
+- **Chrome/Edge only, by design, not silently**: this uses the
+  browser's own built-in speech recognition (`SpeechRecognition` /
+  `webkitSpeechRecognition`) — free, no API key, live, but only
+  reliably supported in Chromium browsers. The page says so plainly if
+  opened somewhere else, rather than failing silently.
+- **No audio is recorded or stored** — only the live text transcript.
+  This is a deliberate trade-off: a paid speech-to-text API would cost
+  money per minute, and storing an actual voice recording of a client
+  raises its own data-protection questions this platform isn't set up
+  to handle responsibly. A timestamped, searchable text record serves
+  the same compliance purpose.
+- **The formal Attitude-to-Risk questionnaire is never inferred from
+  the call** — how a client talks about risk gets captured as a
+  separate "risk behaviour" note for context, never used to fill in or
+  guess the ATR score, which still needs the client's own direct
+  answers (same discipline Meeting-to-Fact-Find AI already holds to).
+- Reuses Document Intake's extraction engine entirely — see that
+  section above for exactly what does and doesn't get auto-applied.
+
 ### CGT & Portfolio Intelligence
 
 **`/advisor/households/[id]/cgt-analysis`** — tag each investment
