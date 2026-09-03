@@ -138,14 +138,19 @@ export function CgtAnalysisClient({
               {active.perPerson.map((p) => (
                 <div key={p.personId} className="space-y-3 border-t border-hairline pt-4 first:border-0 first:pt-0">
                   <p className="font-display text-lg text-ink-100">{p.personName}</p>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
                     <Stat label="Net unrealised gain" value={formatCurrency(p.netGain)} />
                     <Stat label="Remaining allowance" value={formatCurrency(p.remainingAllowance)} />
-                    <Stat label="Est. tax (basic)" value={formatCurrency(p.estimatedTaxIfRealisedNow.basicRate)} />
-                    <Stat label="Est. tax (higher)" value={formatCurrency(p.estimatedTaxIfRealisedNow.higherRate)} />
+                    <Stat label="Best estimate tax" value={formatCurrency(p.rateSplit.estimatedTax)} />
+                    <Stat label="Est. tax (all basic)" value={formatCurrency(p.estimatedTaxIfRealisedNow.basicRate)} />
+                    <Stat label="Est. tax (all higher)" value={formatCurrency(p.estimatedTaxIfRealisedNow.higherRate)} />
                   </div>
                   {p.likelyBand !== 'unknown' && (
-                    <p className="text-xs text-ink-500">Likely {p.likelyBand}-rate taxpayer, based on recorded income (estimate only).</p>
+                    <p className="text-xs text-ink-500">
+                      {p.likelyBand === 'split'
+                        ? `Based on recorded income, roughly ${formatCurrency(p.rateSplit.amountAtBasicRate)} of this gain would fall at basic rate and ${formatCurrency(p.rateSplit.amountAtHigherRate)} at higher rate (estimate only).`
+                        : `Likely ${p.likelyBand}-rate taxpayer, based on recorded income (estimate only).`}
+                    </p>
                   )}
 
                   {p.holdings.length > 0 && (

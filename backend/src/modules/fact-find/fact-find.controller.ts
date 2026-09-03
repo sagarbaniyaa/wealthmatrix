@@ -8,11 +8,14 @@ import { HouseholdService } from '../household/household.service';
 import { FactFindService } from '../../services/fact-find/fact-find.service';
 import { UpsertFactFindDto } from './dto/upsert-fact-find.dto';
 import { RISK_QUESTIONNAIRE } from '../../services/fact-find/risk-questionnaire.constants';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Fact finds are household-scoped and adviser/admin-only to create/edit —
 // a client never fills this in directly. Read access for a client is
 // deliberately NOT exposed here; if that's wanted later, it should be a
 // separate read-only endpoint scoped like ClientNoteController, not this one.
+@ApiTags('Fact Find')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/fact-finds')
 @Roles(Role.ADMIN, Role.ADVISER)

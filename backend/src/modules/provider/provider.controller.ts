@@ -6,11 +6,14 @@ import { Role } from '../../common/enums/role.enum';
 import { ProviderService } from './provider.service';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // The firm's provider directory. Every adviser/admin can see and edit
 // contact details (per spec: "Advisers can edit these later") — creating
 // or deleting a directory entry outright is admin-only, so an adviser
 // can't accidentally wipe an entry other advisers rely on.
+@ApiTags('Provider')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('providers')
 @Roles(Role.ADMIN, Role.ADVISER)

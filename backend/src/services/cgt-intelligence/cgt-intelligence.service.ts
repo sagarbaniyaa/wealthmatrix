@@ -8,8 +8,9 @@ import {
   AccountEntity, HoldingEntity, AssetEntity, WealthTransaction, IncomeEntity,
 } from '../../database/entities';
 import { FXConversionService } from '../fx-conversion/fx-conversion.service';
-import { CGT_ANNUAL_EXEMPT_AMOUNT, CGT_BASIC_RATE, CGT_HIGHER_RATE, HIGHER_RATE_THRESHOLD_ANNUAL_INCOME } from './cgt-rates.constants';
+import { CGT_ANNUAL_EXEMPT_AMOUNT, CGT_BASIC_RATE, CGT_HIGHER_RATE } from './cgt-rates.constants';
 import { computeSection104Pool, Section104Transaction } from './section-104';
+import { computeCgtRateSplit } from './cgt-rate-banding';
 
 const CGT_EXEMPT_WRAPPERS = new Set([TaxWrapper.ISA, TaxWrapper.SIPP]);
 const OUT_OF_SCOPE_WRAPPERS = new Set([TaxWrapper.ONSHORE_BOND, TaxWrapper.OFFSHORE_BOND]);
@@ -30,11 +31,15 @@ export interface CgtComputeResult {
  *
  * Nothing here is AI-generated — it's arithmetic over real holdings/
  * transactions plus a small table of current UK CGT constants (see
- * cgt-rates.constants.ts). The one thing it deliberately does NOT do is
- * pick a single CGT rate per person: without a full income-tax
- * computation, basic-vs-higher-rate status is a guess, so both rates
- * are always shown, with the likelier one only labelled, never chosen
- * for the adviser.
+ * cgt-rates.constants.ts). estimatedTaxIfRealisedNow still shows both
+ * flat-rate bounding scenarios ("if this gain were entirely basic rate"
+ * / "entirely higher rate") so nothing is silently hidden; rateSplit
+ * (cgt-rate-banding.ts) is the actual banded computation — how much of
+ * the gain falls in the person's remaining basic-rate band, using a
+ * real income-tax personal-allowance-and-taper calculation, not a flat
+ * income threshold. Still an ESTIMATE, not a computation an adviser
+ * should rely on unchecked: no allowance for pension contributions,
+ * Gift Aid, or other income-tax reliefs that would move the band.
  */
 @Injectable()
 export class CgtIntelligenceService {
@@ -135,7 +140,7 @@ export class CgtIntelligenceService {
       const netGain = totalGains - totalLosses;
       const taxableGain = Math.max(0, netGain - CGT_ANNUAL_EXEMPT_AMOUNT);
       const annualIncome = await this.estimateAnnualIncome(person.id);
-      const likelyBand: PerPersonCgtPosition['likelyBand'] = annualIncome === null ? 'unknown' : annualIncome >= HIGHER_RATE_THRESHOLD_ANNUAL_INCOME ? 'higher' : 'basic';
+      const rateSplit = computeCgtRateSplit(annualIncome, taxableGain);
 
       const position: PerPersonCgtPosition = {
         personId: person.id,
@@ -144,7 +149,13 @@ export class CgtIntelligenceService {
         totalGains, totalLosses, netGain,
         remainingAllowance: Math.max(0, CGT_ANNUAL_EXEMPT_AMOUNT - Math.max(0, netGain)),
         estimatedTaxIfRealisedNow: { basicRate: taxableGain * CGT_BASIC_RATE, higherRate: taxableGain * CGT_HIGHER_RATE },
-        likelyBand,
+        rateSplit: {
+          amountAtBasicRate: rateSplit.amountAtBasicRate,
+          amountAtHigherRate: rateSplit.amountAtHigherRate,
+          estimatedTax: rateSplit.estimatedTax,
+          basicRateBandRemaining: rateSplit.basicRateBandRemaining,
+        },
+        likelyBand: rateSplit.band,
         holdings: holdingDetails,
       };
       perPerson.push(position);
@@ -169,7 +180,7 @@ export class CgtIntelligenceService {
   private async computeCostBasis(accountId: string, assetId: string, currentQuantity: number | null, baseCurrencyId: string): Promise<{ costBasis: number | null; note: string | null }> {
     const manager = TenantContext.getManager();
     const txns = await manager.getRepository(WealthTransaction).find({
-      where: { accountId, assetId, transactionType: In([TransactionType.BUY, TransactionType.SELL]) } as any,
+      where: { accountId, assetId, transactionType: In([TransactionType.BUY, TransactionType.SELL, TransactionType.STOCK_SPLIT]) } as any,
       order: { transactionDate: 'ASC' } as any,
     });
 
@@ -179,6 +190,13 @@ export class CgtIntelligenceService {
 
     const converted: Section104Transaction[] = [];
     for (const txn of txns) {
+      // A stock split/consolidation moves no cash — its quantity is the
+      // signed pool adjustment directly, never FX-converted (there's no
+      // amount to convert), unlike a real buy/sell.
+      if (txn.transactionType === TransactionType.STOCK_SPLIT) {
+        converted.push({ type: 'reorganisation', date: txn.transactionDate, quantity: Number(txn.quantity ?? 0), amountBase: 0 });
+        continue;
+      }
       const amountBase = txn.amount * (await this.fx.getRate(txn.currencyId, baseCurrencyId, txn.transactionDate));
       converted.push({
         type: txn.transactionType === TransactionType.BUY ? 'buy' : 'sell',
@@ -254,10 +272,16 @@ export class CgtIntelligenceService {
     }
 
     if (position.remainingAllowance > 0) {
+      const bandNote =
+        position.likelyBand === 'unknown'
+          ? ''
+          : position.likelyBand === 'split'
+            ? ` — based on recorded income, roughly ${position.rateSplit.amountAtBasicRate.toFixed(2)} of a gain realised now would fall at basic rate and ${position.rateSplit.amountAtHigherRate.toFixed(2)} at higher rate`
+            : ` — likely ${position.likelyBand} rate based on recorded income`;
       recs.push({
         category: 'withdrawal_strategy', personId: position.personId,
         title: `${position.remainingAllowance.toFixed(2)} of this year's CGT allowance is unused`,
-        detail: `Realising gains up to ${position.remainingAllowance.toFixed(2)} this tax year costs no CGT — a "use it or lose it" allowance that doesn't carry forward. Above that, gains are taxed at ${(CGT_BASIC_RATE * 100).toFixed(0)}% (basic rate) or ${(CGT_HIGHER_RATE * 100).toFixed(0)}% (higher rate)${position.likelyBand !== 'unknown' ? ` — likely ${position.likelyBand} rate based on recorded income` : ''}.`,
+        detail: `Realising gains up to ${position.remainingAllowance.toFixed(2)} this tax year costs no CGT — a "use it or lose it" allowance that doesn't carry forward. Above that, gains are taxed at ${(CGT_BASIC_RATE * 100).toFixed(0)}% (basic rate) or ${(CGT_HIGHER_RATE * 100).toFixed(0)}% (higher rate)${bandNote}.`,
       });
     }
 

@@ -6,7 +6,10 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
 import { CgtIntelligenceService } from '../../services/cgt-intelligence/cgt-intelligence.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('CGT Analysis')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/cgt-analysis')
 @Roles(Role.ADMIN, Role.ADVISER)

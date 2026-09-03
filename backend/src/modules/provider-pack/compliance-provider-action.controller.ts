@@ -7,10 +7,13 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 import { HouseholdService } from '../household/household.service';
 import { ProviderSendService } from '../../services/provider-hub/provider-send.service';
 import { UpdateActionStatusDto } from './dto/update-action-status.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Firm-wide compliance log viewer. Same admin-only pattern as the
 // existing audit-trail viewer on /advisor/compliance — an adviser sees
 // this household-by-household instead, via GET .../provider-pack/actions.
+@ApiTags('Compliance Provider Action')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('compliance-provider-actions')
 export class ComplianceProviderActionController {

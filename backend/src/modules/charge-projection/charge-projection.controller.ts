@@ -7,7 +7,10 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 import { HouseholdService } from '../household/household.service';
 import { ChargeProjectionService } from '../../services/charge-projection/charge-projection.service';
 import { CreateChargeProjectionDto } from './dto/create-charge-projection.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Charge Projection')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/charge-projections')
 @Roles(Role.ADMIN, Role.ADVISER)

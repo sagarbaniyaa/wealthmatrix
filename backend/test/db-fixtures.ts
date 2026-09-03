@@ -32,3 +32,37 @@ export async function fetchTestIdentity(): Promise<{ firmId: string; adminUserId
     await client.end();
   }
 }
+
+/**
+ * Finds a real, already-seeded entity that has a household_id AND an
+ * account owned by that same entity — the exact shape the access-
+ * control integration tests need (an anchor entity to hang a new
+ * ownership-graph-only entity off of, plus a real account to probe
+ * directly) — without hardcoding any UUID, so this stays robust to a
+ * reseed the same way fetchTestIdentity is. Returns null if the seed
+ * data doesn't have this shape (tests using it should skip, not fail).
+ */
+export async function fetchTestEntityWithAccount(
+  firmId: string,
+): Promise<{ entityId: string; householdId: string; baseCurrencyId: string; accountId: string } | null> {
+  const client = new Client({
+    host: process.env.DB_HOST, port: Number(process.env.DB_PORT), user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD, database: process.env.DB_DATABASE,
+  });
+  await client.connect();
+  try {
+    await client.query(`SELECT set_config('app.current_firm_id', $1, false)`, [firmId]);
+    const result = await client.query(
+      `SELECT e.id AS entity_id, e.household_id, e.base_currency_id, a.id AS account_id
+       FROM entity e
+       JOIN account a ON a.owner_entity_id = e.id
+       WHERE e.household_id IS NOT NULL
+       LIMIT 1`,
+    );
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    return { entityId: row.entity_id, householdId: row.household_id, baseCurrencyId: row.base_currency_id, accountId: row.account_id };
+  } finally {
+    await client.end();
+  }
+}

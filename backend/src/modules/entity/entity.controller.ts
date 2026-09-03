@@ -9,7 +9,10 @@ import { UpdateEntityDto } from './dto/update-entity.dto';
 import { EntityStructureService } from '../../services/entity-structure/entity-structure.service';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Entity')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('entities')
 export class EntityController {
@@ -26,17 +29,17 @@ export class EntityController {
     return this.service.findAll({ householdId } as any);
   }
 
-  // Known remaining gap, not silently ignored: entity.household_id is
-  // nullable — an entity reached only via the ownership graph from a
-  // DIFFERENT entity (not linked to any household directly) has no
-  // single household to check access against here. Firm-level RLS
-  // still applies either way; this closes the direct-ID-guess gap for
-  // the common case (an entity that DOES have a household_id) without
-  // claiming to solve full ownership-graph-aware access control.
+  // Closed: entity.household_id is nullable — an entity reached only via
+  // another entity's ownership graph (no direct household_id of its own)
+  // used to fall through to firm-level RLS alone. ensureEntityAccessible
+  // walks the ownership graph upward (owner_entity_id chains and
+  // owner_person_id -> household_member links) to find every household
+  // this entity is transitively part of, and grants access if the user
+  // can see any one of them — see HouseholdService for the full writeup.
   @Get(':id') @Roles(Role.ADMIN, Role.ADVISER, Role.CLIENT)
   async findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     const entity = await this.service.findOneOrFail(id);
-    if (entity.householdId) await this.households.ensureAccessible(entity.householdId, user as any);
+    await this.households.ensureEntityAccessible(id, user as any);
     return entity;
   }
 
@@ -55,8 +58,8 @@ export class EntityController {
 
   @Patch(':id') @Roles(Role.ADMIN, Role.ADVISER)
   async update(@Param('id') id: string, @Body() dto: UpdateEntityDto, @CurrentUser() user: AuthenticatedUser) {
-    const entity = await this.service.findOneOrFail(id);
-    if (entity.householdId) await this.households.ensureAccessible(entity.householdId, user as any);
+    await this.service.findOneOrFail(id);
+    await this.households.ensureEntityAccessible(id, user as any);
     return this.service.update(id, dto);
   }
 

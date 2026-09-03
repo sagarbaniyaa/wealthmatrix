@@ -731,14 +731,21 @@ npm run dev
 
 - **Password reset** is a placeholder page on both login flows — no
   token-based reset endpoint exists on the backend yet.
-- **RBAC hardening — closed for the endpoints that had it documented as
-  missing**: scenarios, risk-exposure, compliance-log, and entities (the
-  ones explicitly called out here previously) now all enforce adviser-
-  household-assignment via `ensureAccessible`, same as `households/:id`
-  and `net-worth`. One narrower case remains, documented in
-  `EntityController`'s own comment: an entity reached only through
-  another entity's ownership graph (no direct `household_id` of its
-  own) still relies on firm-level RLS alone.
+- **RBAC hardening — fully closed**: scenarios, risk-exposure,
+  compliance-log, and entities (the ones explicitly called out here
+  previously) now all enforce adviser-household-assignment via
+  `ensureAccessible`, same as `households/:id` and `net-worth`. The
+  narrower case noted here before — an entity reached only through
+  another entity's ownership graph, with no direct `household_id` of
+  its own — is closed too, via `HouseholdService.ensureEntityAccessible`
+  (walks the ownership graph upward to find every household the entity
+  is transitively part of). Applied to both `EntityController` and
+  `EntityOwnershipController`. A follow-up sweep found the same gap one
+  layer down — `account`, `holding`, `transaction`, `income`, `person`,
+  `household-member`, and `structure-version` had never been checked
+  against the caller's actual household assignment at all — now closed
+  via `ensurePersonAccessible`/`ensureAccountAccessible`, and verified
+  with an integration test, not just written and trusted.
 - **Postgres `NUMERIC` columns return as strings** from the driver
   (`ownershipPct`, `income.amount`, `holding.marketValue` all hit this) —
   every known call site now coerces with `Number(...)`, but a new call

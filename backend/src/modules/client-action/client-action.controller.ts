@@ -8,7 +8,10 @@ import { HouseholdService } from '../household/household.service';
 import { ClientActionService } from '../../services/client-action/client-action.service';
 import { SetClientActionDto } from './dto/set-client-action.dto';
 import { ACTION_REQUIREMENTS, ActionType } from '../../services/client-action/action-requirements.constants';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Client Action')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/action')
 @Roles(Role.ADMIN, Role.ADVISER)

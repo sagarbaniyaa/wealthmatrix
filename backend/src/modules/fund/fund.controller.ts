@@ -17,6 +17,7 @@ import { FundComparisonService } from '../../services/fund-research/fund-compari
 import { FundSuitabilityService } from '../../services/fund-research/fund-suitability.service';
 import { FundImportService } from '../../services/fund-research/fund-import.service';
 import { FundAnalyticsService } from '../../services/fund-research/fund-analytics.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Fund research is an adviser/admin tool — the client role has no access
 // here at all (consistent with "no adviser tools in the client portal").
@@ -24,6 +25,8 @@ import { FundAnalyticsService } from '../../services/fund-research/fund-analytic
 // Route order matters: every static-segment route (filter-options,
 // screener, compare, suitability/:householdId, import) MUST be declared
 // before ':id', or Nest matches ':id' first and swallows them.
+@ApiTags('Fund')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('funds')
 @Roles(Role.ADMIN, Role.ADVISER)

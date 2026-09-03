@@ -5,7 +5,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { ExchangeRateService } from './exchange-rate.service';
 import { CreateExchangeRateDto } from './dto/create-exchange-rate.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Exchange Rate')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('exchange-rates')
 export class ExchangeRateController {

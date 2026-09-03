@@ -10,12 +10,15 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { LoaTemplateService } from '../../services/provider-hub/loa-template.service';
 import { UploadLoaTemplateDto } from './dto/upload-loa-template.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 const ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/pdf',
 ]);
 
+@ApiTags('LOA Template')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('loa-templates')
 @Roles(Role.ADMIN, Role.ADVISER)

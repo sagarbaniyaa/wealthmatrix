@@ -5,7 +5,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { AdviserHouseholdAssignmentService } from './adviser-household-assignment.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Adviser Household Assignment')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('adviser-assignments')
 export class AdviserHouseholdAssignmentController {

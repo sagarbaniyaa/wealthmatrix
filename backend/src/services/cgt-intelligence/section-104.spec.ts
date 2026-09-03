@@ -88,4 +88,48 @@ describe('computeSection104Pool', () => {
     const shuffled = [chronological[1], chronological[0]];
     expect(computeSection104Pool(shuffled)).toEqual(computeSection104Pool(chronological));
   });
+
+  it('a stock split (bonus issue / sub-division) adjusts pool quantity only — cost is untouched', () => {
+    const txns: Section104Transaction[] = [
+      { type: 'buy', date: '2020-01-01', quantity: 100, amountBase: 1000 }, // £10/unit
+      { type: 'reorganisation', date: '2021-01-01', quantity: 100, amountBase: 0 }, // 2-for-1 split: +100 units
+    ];
+    const result = computeSection104Pool(txns);
+    expect(result.poolQuantity).toBeCloseTo(200);
+    expect(result.poolCost).toBeCloseTo(1000); // same total cost, now spread over twice the units (£5/unit)
+    expect(result.matches).toHaveLength(0);
+  });
+
+  it('a consolidation (reverse split) reduces pool quantity via a negative delta — cost still untouched', () => {
+    const txns: Section104Transaction[] = [
+      { type: 'buy', date: '2020-01-01', quantity: 100, amountBase: 1000 }, // £10/unit
+      { type: 'reorganisation', date: '2021-01-01', quantity: -90, amountBase: 0 }, // 1-for-10 consolidation: 100 -> 10 units
+    ];
+    const result = computeSection104Pool(txns);
+    expect(result.poolQuantity).toBeCloseTo(10);
+    expect(result.poolCost).toBeCloseTo(1000); // £100/unit now
+  });
+
+  it('a later sale draws down the pool at the POST-split average cost', () => {
+    const txns: Section104Transaction[] = [
+      { type: 'buy', date: '2020-01-01', quantity: 100, amountBase: 1000 }, // £10/unit
+      { type: 'reorganisation', date: '2021-01-01', quantity: 100, amountBase: 0 }, // split -> 200 units / £1000 (£5/unit)
+      { type: 'sell', date: '2022-01-01', quantity: 100, amountBase: 900 },
+    ];
+    const result = computeSection104Pool(txns);
+    // 100 units sold at £5/unit average = £500 removed, leaving 100 units / £500.
+    expect(result.poolQuantity).toBeCloseTo(100);
+    expect(result.poolCost).toBeCloseTo(500);
+    expect(result.matches).toEqual([{ saleDate: '2022-01-01', quantity: 100, rule: 'section-104' }]);
+  });
+
+  it('a rights issue needs no special handling — an ordinary buy already adds it to the pool correctly', () => {
+    const txns: Section104Transaction[] = [
+      { type: 'buy', date: '2020-01-01', quantity: 100, amountBase: 1000 }, // £10/unit
+      { type: 'buy', date: '2021-06-01', quantity: 20, amountBase: 100 },   // rights issue: 20 new units at a discounted £5/unit
+    ];
+    const result = computeSection104Pool(txns);
+    expect(result.poolQuantity).toBeCloseTo(120);
+    expect(result.poolCost).toBeCloseTo(1100);
+  });
 });

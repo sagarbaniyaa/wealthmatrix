@@ -598,7 +598,8 @@ export interface PerPersonCgtPosition {
   personId: string; personName: string; annualExemptAmount: number;
   totalGains: number; totalLosses: number; netGain: number; remainingAllowance: number;
   estimatedTaxIfRealisedNow: { basicRate: number; higherRate: number };
-  likelyBand: 'basic' | 'higher' | 'unknown';
+  rateSplit: { amountAtBasicRate: number; amountAtHigherRate: number; estimatedTax: number; basicRateBandRemaining: number | null };
+  likelyBand: 'basic' | 'higher' | 'split' | 'unknown';
   holdings: CgtHoldingDetail[];
 }
 export interface CgtRecommendation {

@@ -8,7 +8,10 @@ import { CreateScenarioDto } from './dto/create-scenario.dto';
 import { ScenarioEngineService } from '../../services/scenario-engine/scenario-engine.service';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Scenario')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('scenarios')
 export class ScenarioController {

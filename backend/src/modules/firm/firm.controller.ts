@@ -5,9 +5,12 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { FirmService } from './firm.service';
 import { UpdateFirmDto } from './dto/update-firm.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Firms are provisioned by Anthropic-side ops tooling, not self-serve — no POST here.
 // Admins can view/update their own firm's settings only (RLS scopes this automatically).
+@ApiTags('Firm')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('firms')
 export class FirmController {

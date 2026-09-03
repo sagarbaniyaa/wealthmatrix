@@ -6,11 +6,14 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { AppUserService } from './app-user.service';
 import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Read-only roster of the firm's own users — email + role only
 // (password_hash is `select: false` on the entity, so it never leaves
 // here). Needed for adviser-assignment pickers and the adviser
 // performance report; not client-facing.
+@ApiTags('App User')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class AppUserController {

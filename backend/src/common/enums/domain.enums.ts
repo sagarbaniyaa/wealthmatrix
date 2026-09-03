@@ -41,6 +41,15 @@ export enum TransactionType {
   TRANSFER = 'transfer',
   VALUATION_ADJUSTMENT = 'valuation_adjustment',
   DISTRIBUTION = 'distribution',
+  // A bonus issue, sub-division (stock split) or consolidation (reverse
+  // split) — HMRC treats these as an adjustment to the Section 104 pool's
+  // QUANTITY only, never its cost (see section-104.ts). `quantity` is the
+  // signed net change in units (positive for a split/bonus issue, negative
+  // for a consolidation); `amount` is always 0 — no cash changes hands.
+  // A rights issue is deliberately NOT a separate type here: HMRC treats
+  // the shares bought through one as an ordinary addition to the pool at
+  // the price paid, which a normal BUY transaction already models exactly.
+  STOCK_SPLIT = 'stock_split',
 }
 
 // CGT & Portfolio Intelligence — see migration 014. Determines whether

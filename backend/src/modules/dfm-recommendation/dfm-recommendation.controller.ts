@@ -6,7 +6,10 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
 import { DfmRecommendationService } from '../../services/dfm-recommendation/dfm-recommendation.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('DFM Recommendation')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/dfm-recommendation')
 @Roles(Role.ADMIN, Role.ADVISER)

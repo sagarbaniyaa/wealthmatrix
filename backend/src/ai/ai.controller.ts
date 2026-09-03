@@ -9,7 +9,10 @@ import { CompareFundsDto } from '../modules/fund/dto/compare-funds.dto';
 import { SuitabilityReportService } from '../services/suitability-report/suitability-report.service';
 import { FactFindParserService } from '../services/fact-find/fact-find-parser.service';
 import { ParseFactFindNotesDto } from './dto/parse-fact-find-notes.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('AI')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('ai')
 export class AiController {

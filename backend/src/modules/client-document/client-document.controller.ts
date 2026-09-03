@@ -12,6 +12,7 @@ import { ClientDocumentService } from './client-document.service';
 import { UploadClientDocumentDto } from './dto/upload-client-document.dto';
 import { HouseholdService } from '../household/household.service';
 import { DocumentIntakeService } from '../../services/document-intake/document-intake.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Nested under a household because every document belongs to exactly one
 // client — KYC, ID proof, address proof, bank statements. These are things
@@ -19,6 +20,8 @@ import { DocumentIntakeService } from '../../services/document-intake/document-i
 // endpoint only ever stores what an adviser actually uploads (see
 // UPLOADABLE_DOCUMENT_TYPES) — fact-find/policy-summary/adviser-details
 // are produced by DocumentGeneratorService instead, never uploaded here.
+@ApiTags('Client Document')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/documents')
 @Roles(Role.ADMIN, Role.ADVISER)

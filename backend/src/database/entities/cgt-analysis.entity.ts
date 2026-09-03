@@ -21,7 +21,16 @@ export interface PerPersonCgtPosition {
   netGain: number;
   remainingAllowance: number;
   estimatedTaxIfRealisedNow: { basicRate: number; higherRate: number };
-  likelyBand: 'basic' | 'higher' | 'unknown';
+  /**
+   * The actual best estimate — how much of the taxable gain falls in
+   * the person's remaining basic-rate band vs. above it, per
+   * computeCgtRateSplit (cgt-rate-banding.ts), and the resulting tax.
+   * estimatedTaxIfRealisedNow above stays as the two bounding
+   * hypotheticals ("if this were ALL basic rate" / "ALL higher rate");
+   * this is the real, banded calculation, not a bound.
+   */
+  rateSplit: { amountAtBasicRate: number; amountAtHigherRate: number; estimatedTax: number; basicRateBandRemaining: number | null };
+  likelyBand: 'basic' | 'higher' | 'split' | 'unknown';
   holdings: CgtHoldingDetail[];
 }
 

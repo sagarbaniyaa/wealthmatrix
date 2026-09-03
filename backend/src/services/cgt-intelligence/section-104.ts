@@ -11,26 +11,41 @@
  *      running weighted-average-cost pool of everything else.
  *
  * This was a known, explicitly documented gap in the original CGT
- * engine (only step 3 was implemented) — closed here. Genuine
- * simplifications that remain, on purpose, not silently:
+ * engine (only step 3 was implemented) — closed here. A stock split,
+ * bonus issue, or consolidation is also handled, as HMRC requires: an
+ * adjustment to the pool's QUANTITY only, never its cost — the same
+ * total cost is simply spread over a different number of units. A
+ * rights issue needs no special handling here at all: HMRC treats the
+ * shares it buys as an ordinary addition to the pool at the price
+ * actually paid, which the existing 'buy' type already models exactly.
+ *
+ * Genuine simplifications that remain, on purpose, not silently:
  *  - No support for multiple disposals ON THE SAME DAY interacting with
  *    each other's 30-day matching (each sale is matched independently,
  *    in date order, against the buy pool as it stands after earlier
  *    sales have already claimed their matches).
- *  - No handling of stock splits, rights issues, or scrip dividends,
- *    which HMRC treats as adjustments to a Section 104 pool rather than
- *    ordinary buys/sells.
- *  - Assumes every BUY/SELL transaction for a holding is present in
- *    this platform's data — a transfer-in from another platform with no
- *    recorded acquisition history still reports as a data-quality gap
- *    (see CgtIntelligenceService), not a fabricated cost basis.
+ *  - No handling of scrip dividends or complex reorganisations (e.g. a
+ *    takeover paid partly in cash, partly in shares) — those need
+ *    case-by-case HMRC treatment beyond a simple quantity adjustment.
+ *  - Assumes every BUY/SELL/REORGANISATION transaction for a holding is
+ *    present in this platform's data — a transfer-in from another
+ *    platform with no recorded acquisition history still reports as a
+ *    data-quality gap (see CgtIntelligenceService), not a fabricated
+ *    cost basis.
  */
 
 export interface Section104Transaction {
-  type: 'buy' | 'sell';
+  type: 'buy' | 'sell' | 'reorganisation';
   date: string; // ISO yyyy-mm-dd
+  // buy/sell: quantity bought/sold. reorganisation: the SIGNED NET
+  // CHANGE in units — positive for a split/bonus issue, negative for a
+  // consolidation (reverse split).
   quantity: number;
-  amountBase: number; // buy: total cost; sell: not used by this function (only quantity/date matter for cost-basis-of-remainder purposes)
+  // buy: total cost. sell: not used by this function (only quantity/date
+  // matter for cost-basis-of-remainder purposes). reorganisation: not
+  // used — a reorganisation never changes the pool's total cost, only
+  // how many units it's spread across.
+  amountBase: number;
 }
 
 export interface Section104Match {
@@ -92,9 +107,12 @@ export function computeSection104Pool(transactions: Section104Transaction[]): Se
   }
 
   // Step 3 — walk chronologically; each buy contributes only its
-  // POST-matching remaining quantity/cost to the pool, and each sell
-  // draws down only its POST-matching remaining quantity, at the
-  // pool's running average cost.
+  // POST-matching remaining quantity/cost to the pool, each sell draws
+  // down only its POST-matching remaining quantity at the pool's
+  // running average cost, and a reorganisation adjusts the pool's
+  // quantity directly (its total cost is untouched — that's the whole
+  // point of the rule: a split changes how many units the same money
+  // bought, not how much was spent).
   let poolQuantity = 0;
   let poolCost = 0;
   for (const item of items) {
@@ -103,6 +121,8 @@ export function computeSection104Pool(transactions: Section104Transaction[]): Se
         poolQuantity += item.remaining;
         poolCost += item.remaining * item.unitCost;
       }
+    } else if (item.type === 'reorganisation') {
+      poolQuantity += item.quantity;
     } else if (item.remaining > 0 && poolQuantity > 0) {
       const avgCost = poolCost / poolQuantity;
       const soldQty = Math.min(item.remaining, poolQuantity);

@@ -7,7 +7,10 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 import { HouseholdService } from '../household/household.service';
 import { CallSessionService } from '../../services/call-session/call-session.service';
 import { CallSuggestionsDto, FinishCallDto } from './dto/call-session.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Call Session')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/call-session')
 @Roles(Role.ADMIN, Role.ADVISER)

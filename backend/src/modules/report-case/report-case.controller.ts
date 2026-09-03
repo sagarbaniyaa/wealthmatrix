@@ -8,7 +8,10 @@ import { HouseholdService } from '../household/household.service';
 import { ReportBuilderService } from '../../services/report-builder/report-builder.service';
 import { GenerateReportCaseDto } from './dto/generate-report-case.dto';
 import { UpdateReportCaseDto } from './dto/update-report-case.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Report Case')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/report-cases')
 @Roles(Role.ADMIN, Role.ADVISER)

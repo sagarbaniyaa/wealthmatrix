@@ -6,7 +6,10 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
 import { TelephonyService } from '../../services/telephony/telephony.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Telephony')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/telephony')
 @Roles(Role.ADMIN, Role.ADVISER)

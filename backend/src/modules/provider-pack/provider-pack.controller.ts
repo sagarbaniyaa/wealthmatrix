@@ -9,9 +9,12 @@ import { HouseholdService } from '../household/household.service';
 import { ProviderSendService } from '../../services/provider-hub/provider-send.service';
 import { GeneratePackDto } from './dto/generate-pack.dto';
 import { SendPackDto } from './dto/send-pack.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Household-scoped: everything here concerns one client's LOA/provider
 // pack. Firm-wide compliance viewing lives on ComplianceProviderActionController.
+@ApiTags('Provider Pack')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/provider-pack')
 @Roles(Role.ADMIN, Role.ADVISER)

@@ -10,12 +10,15 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { ReportTemplateService } from '../../services/report-builder/report-template.service';
 import { UploadReportTemplateDto } from './dto/upload-report-template.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 const ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/pdf',
 ]);
 
+@ApiTags('Report Template')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('report-templates')
 @Roles(Role.ADMIN, Role.ADVISER)

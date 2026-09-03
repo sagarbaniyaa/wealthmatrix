@@ -7,7 +7,10 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 import { HouseholdService } from '../household/household.service';
 import { ConsumerDutyService } from '../../services/consumer-duty/consumer-duty.service';
 import { CreateConsumerDutyReviewDto } from './dto/create-consumer-duty-review.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Consumer Duty Review')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/consumer-duty')
 @Roles(Role.ADMIN, Role.ADVISER)

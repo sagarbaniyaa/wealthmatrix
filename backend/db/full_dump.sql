@@ -1,8 +1,13 @@
 --
 -- PostgreSQL database dump
 --
-
-\restrict EEaDT3nSTHKg6chVeoyIs9l6U5d5LDshYh45qageeZjhQwNIG9fhGZUhG6QX2wG
+-- The \restrict / \unrestrict guard lines pg_dump 18 normally wraps
+-- this file in are deliberately stripped: they're a psql-client-side
+-- safety toggle (introduced in the 2025 psql security release) that
+-- only pg 17+ clients understand, and an older client used to restore
+-- this file (e.g. Ubuntu's default apt psql, used by the backend CI
+-- workflow) errors on them. Safe to drop for a dump we authored
+-- ourselves and trust; nothing else in this file is affected.
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -27,6 +32,13 @@ CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;
 
 
 --
+-- Name: EXTENSION btree_gist; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION btree_gist IS 'support for indexing common datatypes in GiST';
+
+
+--
 -- Name: citext; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -34,10 +46,24 @@ CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
 
 
 --
+-- Name: EXTENSION citext; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
+
+
+--
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
@@ -140,7 +166,8 @@ CREATE TYPE public.transaction_type AS ENUM (
     'fee',
     'transfer',
     'valuation_adjustment',
-    'distribution'
+    'distribution',
+    'stock_split'
 );
 
 
@@ -4422,5 +4449,4 @@ ALTER TABLE public.transaction ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict EEaDT3nSTHKg6chVeoyIs9l6U5d5LDshYh45qageeZjhQwNIG9fhGZUhG6QX2wG
 

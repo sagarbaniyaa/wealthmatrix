@@ -3,7 +3,14 @@ import { In } from 'typeorm';
 import { BaseCrudService } from '../../common/database/base-crud.service';
 import { TenantContext } from '../../common/database/tenant-context';
 import { Role } from '../../common/enums/role.enum';
-import { HouseholdEntity, HouseholdMemberEntity, AdviserHouseholdAssignmentEntity } from '../../database/entities';
+import {
+  HouseholdEntity,
+  HouseholdMemberEntity,
+  AdviserHouseholdAssignmentEntity,
+  WealthEntity,
+  EntityOwnershipEntity,
+  AccountEntity,
+} from '../../database/entities';
 
 @Injectable()
 export class HouseholdService extends BaseCrudService<HouseholdEntity> {
@@ -59,15 +66,16 @@ export class HouseholdService extends BaseCrudService<HouseholdEntity> {
   }
 
   /**
-   * Closes the direct-ID-access gap on the two most-used household
-   * endpoints (detail + net-worth): findAllForUser hides unassigned
+   * Closes the direct-ID-access gap: findAllForUser hides unassigned
    * households from an adviser's list, and RLS only enforces the firm
    * boundary — neither stops an adviser or client from requesting a
-   * household by ID they shouldn't see. Admin bypasses this. Note: this
-   * is not yet applied to every household-scoped sub-resource across
-   * other modules (scenarios, compliance-log, risk-exposure, entities) —
-   * those still rely on firm-level RLS only, which is a real remaining
-   * gap for a fuller hardening pass.
+   * household by ID they shouldn't see. Admin bypasses this. Applied
+   * directly to every household-scoped controller (scenarios,
+   * compliance-log, risk-exposure, client notes, etc.), and indirectly
+   * — via ensureEntityAccessible/ensurePersonAccessible/
+   * ensureAccountAccessible below — to entities, people, accounts,
+   * holdings, transactions and income, none of which carry a
+   * household_id of their own to check directly.
    */
   async ensureAccessible(householdId: string, user: { userId: string; role: Role; personId?: string | null }): Promise<void> {
     if (user.role === Role.ADMIN) return;
@@ -83,6 +91,122 @@ export class HouseholdService extends BaseCrudService<HouseholdEntity> {
     if (user.role === Role.CLIENT) {
       const own = await this.findForClient(user.personId);
       if (!own || own.id !== householdId) throw new ForbiddenException('You can only view your own household.');
+    }
+  }
+
+  /**
+   * Closes the harder case ensureAccessible above couldn't: entity.
+   * household_id is nullable, so a subsidiary reached only through
+   * another entity's ownership graph (e.g. a household holds a trust,
+   * the trust owns a company, and the company itself has no
+   * household_id) had no household to check access against and relied
+   * on firm-level RLS alone — any adviser in the firm could reach it by
+   * guessing its id.
+   *
+   * Walks the ownership graph UPWARD from the given entity (owned ->
+   * owner, following owner_entity_id chains and owner_person_id ->
+   * household_member links) to collect every household the entity is
+   * transitively part of, then grants access if the user can see any
+   * one of them. A cycle-safe BFS (ownership data is meant to be a DAG,
+   * but nothing in the schema forbids a bad row from creating a loop).
+   *
+   * An entity with no household anywhere in its ownership graph (a
+   * true orphan, not linked to any household directly or transitively)
+   * falls through to firm-level RLS only, same as before — there is no
+   * narrower boundary to enforce than "the whole firm" for something
+   * that isn't part of any household's story at all.
+   */
+  async ensureEntityAccessible(entityId: string, user: { userId: string; role: Role; personId?: string | null }): Promise<void> {
+    if (user.role === Role.ADMIN) return;
+
+    const householdIds = await this.findHouseholdsForEntity(entityId);
+    if (householdIds.size === 0) return;
+
+    let lastError: unknown;
+    for (const householdId of householdIds) {
+      try {
+        await this.ensureAccessible(householdId, user);
+        return;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError instanceof Error ? lastError : new ForbiddenException('You do not have access to this entity.');
+  }
+
+  private async findHouseholdsForEntity(entityId: string): Promise<Set<string>> {
+    const manager = TenantContext.getManager();
+    const householdIds = new Set<string>();
+    const visitedEntityIds = new Set<string>();
+    const queue: string[] = [entityId];
+
+    while (queue.length > 0) {
+      const currentId = queue.shift() as string;
+      if (visitedEntityIds.has(currentId)) continue;
+      visitedEntityIds.add(currentId);
+
+      const entity = await manager.getRepository(WealthEntity).findOne({ where: { id: currentId } as any });
+      if (!entity) continue;
+      if (entity.householdId) householdIds.add(entity.householdId);
+
+      const ownershipRows = await manager
+        .getRepository(EntityOwnershipEntity)
+        .find({ where: { ownedEntityId: currentId } as any });
+
+      for (const row of ownershipRows) {
+        if (row.ownerEntityId && !visitedEntityIds.has(row.ownerEntityId)) {
+          queue.push(row.ownerEntityId);
+        }
+        if (row.ownerPersonId) {
+          const memberships = await manager
+            .getRepository(HouseholdMemberEntity)
+            .find({ where: { personId: row.ownerPersonId } as any });
+          for (const membership of memberships) householdIds.add(membership.householdId);
+        }
+      }
+    }
+
+    return householdIds;
+  }
+
+  /**
+   * Same idea as ensureAccessible, for a person who isn't necessarily
+   * the CURRENT user — findForClient above only ever resolves the
+   * caller's own household, which is no help when an adviser is asking
+   * "can I see THIS other person's income/accounts". Grants access if
+   * the person belongs to a household the user can see; a person not
+   * linked to any household falls through to firm-level RLS only, same
+   * reasoning as an orphan entity in ensureEntityAccessible.
+   */
+  async ensurePersonAccessible(personId: string, user: { userId: string; role: Role; personId?: string | null }): Promise<void> {
+    if (user.role === Role.ADMIN) return;
+    const household = await this.findForClient(personId);
+    if (!household) return;
+    await this.ensureAccessible(household.id, user);
+  }
+
+  /**
+   * Closes the same class of gap on account/holding/transaction data:
+   * none of those tables carry a household_id, only owner_person_id XOR
+   * owner_entity_id, so nothing stopped any adviser or client in the
+   * firm reading (or, for holdings/transactions, even attaching new
+   * records to) another household's accounts by knowing or guessing an
+   * account id. Resolves the owning household via whichever owner side
+   * is set and delegates to ensurePersonAccessible/ensureEntityAccessible
+   * — an account with NEITHER owner side set (shouldn't happen, but
+   * nothing in the schema forbids it) falls through to firm-level RLS
+   * only, same reasoning as every other orphan case above.
+   */
+  async ensureAccountAccessible(accountId: string, user: { userId: string; role: Role; personId?: string | null }): Promise<void> {
+    if (user.role === Role.ADMIN) return;
+
+    const account = await TenantContext.getManager().getRepository(AccountEntity).findOne({ where: { id: accountId } as any });
+    if (!account) return;
+
+    if (account.ownerPersonId) {
+      await this.ensurePersonAccessible(account.ownerPersonId, user);
+    } else if (account.ownerEntityId) {
+      await this.ensureEntityAccessible(account.ownerEntityId, user);
     }
   }
 }

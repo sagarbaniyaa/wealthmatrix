@@ -17,9 +17,21 @@ export const CGT_ANNUAL_EXEMPT_AMOUNT = 3000; // £, per individual, per tax yea
 export const CGT_BASIC_RATE = 0.18;
 export const CGT_HIGHER_RATE = 0.24;
 
-// Rough basic/higher-rate split — NOT a full income-tax computation
-// (no allowance for pension contributions, Gift Aid, personal allowance
-// taper, etc.). Used only to pick which of the two rates above to
-// highlight as "likely" for a person; both are always shown regardless,
-// so this heuristic being wrong understates precision, never accuracy.
-export const HIGHER_RATE_THRESHOLD_ANNUAL_INCOME = 50270; // £, 2024/25 basic-rate band ceiling
+// Income-tax banding, used to work out how much of a person's basic-rate
+// band a capital gain actually falls into (see cgt-rate-banding.ts) —
+// UK personal allowance and basic-rate band for 2024/25, plus the
+// £100,000–£125,140 taper (£1 of personal allowance lost per £2 of
+// income above £100,000, gone entirely by £125,140).
+export const PERSONAL_ALLOWANCE = 12_570; // £
+export const PERSONAL_ALLOWANCE_TAPER_START = 100_000; // £
+export const PERSONAL_ALLOWANCE_TAPER_END = 125_140; // £ — personal allowance is £0 from here
+export const BASIC_RATE_BAND = 37_700; // £ of taxable income (after personal allowance) taxed at basic rate
+
+// PERSONAL_ALLOWANCE + BASIC_RATE_BAND — the gross-income point above
+// which someone with no other allowances is a higher-rate taxpayer.
+// Kept as its own constant because it's the number worth eyeballing
+// when the tax year's figures change, even though computeCgtRateSplit
+// no longer uses it directly (it derives the same boundary from the
+// two constants above, correctly accounting for the personal allowance
+// taper for incomes over £100,000, which a flat threshold cannot).
+export const HIGHER_RATE_THRESHOLD_ANNUAL_INCOME = 50_270; // £, 2024/25

@@ -8,7 +8,10 @@ import { HouseholdService } from './household.service';
 import { CreateHouseholdDto } from './dto/create-household.dto';
 import { UpdateHouseholdDto } from './dto/update-household.dto';
 import { WealthConsolidationService } from '../../services/wealth-consolidation/wealth-consolidation.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Household')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households')
 export class HouseholdController {

@@ -232,26 +232,36 @@ is the load-bearing piece of this backend — read
   matching order: same-day, then the 30-day "bed and breakfast" rule,
   then the Section 104 pool (`services/cgt-intelligence/section-104.ts`
   — a chronological running weighted-average cost per holding, walked
-  through its `transaction` BUY/SELL history). Remaining documented
-  simplifications live in that file's own comments (no stock-split/
-  rights-issue handling, same-day multi-disposal interaction). Requires
+  through its `transaction` BUY/SELL/STOCK_SPLIT history), including a
+  stock split, bonus issue, or consolidation as a pool QUANTITY
+  adjustment (cost untouched) via the `stock_split` transaction type
+  (migration 017) — a rights issue needs no special type at all, since
+  HMRC treats it as an ordinary addition to the pool at the price paid,
+  which `BUY` already models. Remaining documented simplifications live
+  in that file's own comments (same-day multi-disposal interaction,
+  scrip dividends, complex cash-and-shares reorganisations). Requires
   `account.tax_wrapper` to be set (migration 014) —
   an ISA/SIPP is excluded as CGT-exempt, a bond is excluded as taxed on
   chargeable-event gains instead, and an UNSET wrapper is excluded too
   rather than guessed either way, since guessing wrong is worse than
   flagging the gap. Outputs, per person (the CGT allowance is personal,
   not household-level): net unrealised gain, remaining annual exempt
-  amount, estimated tax at both current UK rates (basic/higher — it
-  never picks one for you, since that needs a full income-tax
-  computation this platform doesn't attempt) alongside a same-caveat
-  "likely" band estimated from recorded `income` rows, and concrete
-  recommendations (cheapest to sell, already-zero-CGT holdings, the
-  largest embedded gain to avoid disturbing, and how much of this year's
-  allowance is unused). Entirely deterministic arithmetic — see
-  `cgt-rates.constants.ts` for the one place the UK constants
-  (annual exempt amount, rates, higher-rate threshold) live, since
-  those change nearly every tax year. Append-only (`cgt_analysis`,
-  migration 015).
+  amount, estimated tax at both current UK rates as flat bounding
+  scenarios (basic/higher), AND a real banded computation
+  (`cgt-rate-banding.ts`) — how much of the gain actually falls in the
+  person's remaining basic-rate band vs. above it, using a genuine
+  personal-allowance-and-taper calculation (not a flat income
+  threshold), so a person near the boundary correctly shows as a SPLIT
+  case rather than a forced basic-or-higher guess. Still an estimate,
+  not something to rely on unchecked: no allowance for pension
+  contributions, Gift Aid, or other income-tax reliefs that would move
+  the band. Concrete recommendations too (cheapest to sell,
+  already-zero-CGT holdings, the largest embedded gain to avoid
+  disturbing, and how much of this year's allowance is unused).
+  Entirely deterministic arithmetic — see `cgt-rates.constants.ts` for
+  the one place the UK constants (annual exempt amount, rates, personal
+  allowance, basic-rate band) live, since those change nearly every tax
+  year. Append-only (`cgt_analysis`, migration 015).
 - `services/dfm-recommendation` — deterministic DFM mandate + fund
   category recommendation engine. Never names a real regulated DFM firm
   (no due-diligence/fee-panel relationship exists to back that) — outputs
@@ -327,10 +337,48 @@ for changes made *after* the fact. Three things close part of that gap:
   firm-level RLS alone, meaning any adviser in the firm could reach
   another adviser's household's scenarios/risk data by guessing an id.
   All four now call `ensureAccessible` (or an equivalent access check)
-  before returning anything. `entity`'s ownership-graph case (an entity
-  reached only through another entity, with no direct household link)
-  remains a documented, not silently ignored, gap — see the controller's
-  own comment.
+  before returning anything. The harder case — an entity reached only
+  through another entity's ownership graph, with no direct household
+  link of its own — is now closed too:
+  `HouseholdService.ensureEntityAccessible` walks the ownership graph
+  upward (owner-entity chains and owner-person → household-member
+  links) to find every household an entity is transitively part of, and
+  grants access if the user can see any one of them. Applied to both
+  `EntityController` and `EntityOwnershipController` (the latter
+  previously had no access check at all, and would return every
+  ownership row in the firm to any authenticated user who omitted its
+  filter — now scoped or admin-only, same as everywhere else). The same
+  sweep found the identical gap on the resources underneath a household
+  rather than the household itself — `account`, `holding`, `transaction`,
+  and `income` carry no `household_id` at all (only `owner_person_id`/
+  `owner_entity_id`/`person_id`), so nothing had ever checked them
+  against the caller's actual assignment; `person`, `household_member`,
+  and `structure_version` had the same gap `ensureAccessible` closed on
+  scenarios/risk-exposure/compliance-log, just never applied to them.
+  Two new `HouseholdService` methods —
+  `ensurePersonAccessible`/`ensureAccountAccessible` — resolve the owning
+  household through whichever reference the row actually has and close
+  all seven. Proven, not just written: an integration test creates a
+  real ownership-graph-only entity and account, then asserts an adviser
+  with no assignment to that household gets a 403 where firm-level RLS
+  alone would have returned 200.
+- **GitHub Actions CI** (`.github/workflows/backend-ci.yml`) — runs on
+  every push/PR touching `backend/**`: type-check, the full unit +
+  integration suite against a real disposable Postgres (restored from
+  `db/full_dump.sql`, then run as a genuine non-superuser role so RLS is
+  actually exercised, not bypassed), and an audit gate that fails the
+  build on any NEW high/critical runtime vulnerability. Before this,
+  nothing stopped a broken change from being merged — the tests only
+  ran if someone remembered to run them by hand.
+- **`npm audit`** — the two safely-fixable runtime vulnerabilities
+  (`uuid`, `multer`, plus `tar`/`js-yaml` picked up when Swagger was
+  added) are forced to patched versions via `package.json`'s
+  `overrides`, without bumping any `@nestjs/*` package's declared major
+  version. What's left: one moderate `@nestjs/core` advisory whose only
+  fix is Nest v12 (a breaking framework-wide migration, deliberately not
+  rushed here), and ~20 more rooted entirely in `@nestjs/cli`'s own
+  dependency tree — confirmed dev-only build tooling, never present in
+  the deployed `node dist/main.js` runtime.
 - **Sentry** (`common/sentry.ts`) — optional, free tier, reports only
   genuine unexpected errors (an unhandled exception, or a database error
   code this backend doesn't recognise), never routine 400/403/404s. This
@@ -350,6 +398,16 @@ npm install
 psql "$DATABASE_URL" -f db/full_dump.sql
 npm run start:dev
 ```
+
+**API docs**: once running, `/api/docs` is a live Swagger UI for every
+endpoint — request/response shapes, required fields, and enum values are
+generated from the same DTOs and route decorators the app already
+validates against (via the `@nestjs/swagger` compiler plugin,
+`nest-cli.json`), not hand-written and liable to drift out of sync.
+`/api/docs-json` is the raw OpenAPI document, importable into Postman/
+Insomnia. Every endpoint needs the bearer JWT from `POST /auth/login`
+except that route itself and the Twilio webhook — click "Authorize" in
+the UI and paste the token to try requests directly from the browser.
 
 The runtime DB role in `DB_USERNAME` **must not** have `BYPASSRLS`. Every
 RLS-protected table in this schema uses `FORCE ROW LEVEL SECURITY`, so a

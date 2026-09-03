@@ -6,9 +6,12 @@ import { Role } from '../../common/enums/role.enum';
 import { ComplianceLogService } from './compliance-log.service';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Compliance entries are written by risk-monitoring/consolidation jobs, not by users —
 // advisers/admins can only view and resolve (sign off) findings here.
+@ApiTags('Compliance Log')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('compliance-log')
 export class ComplianceLogController {

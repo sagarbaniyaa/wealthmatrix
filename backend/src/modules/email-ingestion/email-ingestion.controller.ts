@@ -6,10 +6,13 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { EmailIngestionService } from '../../services/email-ingestion/email-ingestion.service';
 import { ConnectEmailDto } from './dto/connect-email.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Per-adviser, not household-scoped — this is "my mailbox", the same
 // adviser regardless of which client a provider reply happens to be
 // about (matching is by reference code, see EmailIngestionService).
+@ApiTags('Email Ingestion')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('email-connection')
 @Roles(Role.ADMIN, Role.ADVISER)

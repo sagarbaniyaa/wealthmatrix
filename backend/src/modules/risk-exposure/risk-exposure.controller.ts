@@ -6,9 +6,12 @@ import { Role } from '../../common/enums/role.enum';
 import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-user.decorator';
 import { HouseholdService } from '../household/household.service';
 import { RiskExposureService } from './risk-exposure.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 // Writes to this table come from the risk-monitoring job (WealthConsolidationService /
 // a scheduled cron), not direct user input — hence read-only endpoints here.
+@ApiTags('Risk Exposure')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('risk-exposure')
 export class RiskExposureController {

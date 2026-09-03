@@ -5,7 +5,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 import { FundPerformanceService } from './fund-performance.service';
 import { CreateFundPerformanceDto } from './dto/create-fund-performance.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Fund Performance')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('funds/:fundId/performance')
 @Roles(Role.ADMIN, Role.ADVISER)

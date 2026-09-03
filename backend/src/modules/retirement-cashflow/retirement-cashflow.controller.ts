@@ -7,7 +7,10 @@ import { CurrentUser, AuthenticatedUser } from '../../common/decorators/current-
 import { HouseholdService } from '../household/household.service';
 import { RetirementCashflowService } from '../../services/retirement-cashflow/retirement-cashflow.service';
 import { CreateRetirementCashflowDto } from './dto/create-retirement-cashflow.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Retirement Cashflow')
+@ApiBearerAuth('jwt')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('households/:householdId/retirement-cashflow')
 @Roles(Role.ADMIN, Role.ADVISER)

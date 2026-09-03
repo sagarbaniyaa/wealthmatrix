@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { runInTenantContext } from '../../common/database/run-in-tenant-context';
 import { Role } from '../../common/enums/role.enum';
 import { TelephonyService } from '../../services/telephony/telephony.service';
+import { ApiTags } from '@nestjs/swagger';
 
 /**
  * Twilio calls this directly (no JWT — Twilio doesn't have one), so
@@ -18,6 +19,7 @@ import { TelephonyService } from '../../services/telephony/telephony.service';
  * because client_call_log is RLS-protected and this request has no
  * other way to establish which tenant it belongs to before reading it.
  */
+@ApiTags('Telephony Webhook')
 @Controller('telephony')
 export class TelephonyWebhookController {
   constructor(

@@ -1,0 +1,23 @@
+-- =====================================================================
+-- Stock split / bonus issue / consolidation as a Section 104 pool
+-- adjustment, not an ordinary buy or sell. Run as postgres superuser
+-- (same reason as prior migrations). Idempotent.
+--
+-- Design notes:
+--  - A new transaction_type value only — no new table, no new column.
+--    quantity holds the signed net change in units (positive for a
+--    split/bonus issue, negative for a consolidation); amount is always
+--    0 (no cash changes hands). See section-104.ts for how the CGT
+--    engine applies this to the pool.
+--  - A rights issue is deliberately NOT a new type: HMRC treats the
+--    shares acquired through one as an ordinary addition to the pool at
+--    the price actually paid, which the existing BUY type already
+--    models correctly.
+--  - ALTER TYPE ... ADD VALUE cannot run inside the same transaction
+--    block as a later statement that USES the new value, but committing
+--    on its own (outside BEGIN/COMMIT) is safe and is the documented
+--    way to do this — nothing in this migration references the new
+--    value afterwards.
+-- =====================================================================
+
+ALTER TYPE transaction_type ADD VALUE IF NOT EXISTS 'stock_split';
