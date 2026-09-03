@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 import { Request, Response } from 'express';
+import { reportUnexpectedError } from '../sentry';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -32,6 +33,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof QueryFailedError) {
       const pgError = exception as any;
       const status = this.mapPgErrorToStatus(pgError.code);
+      // An UNRECOGNISED Postgres error code is worth reporting — it's
+      // exactly the shape of bug that broke Document Intake on the live
+      // site (a migration never applied there): something a user will
+      // hit before anyone else notices, unless this is wired up.
+      // Recognised codes (23505 dupe key, 23514 check violation, etc.)
+      // are expected application flow, not incidents.
+      if (!['23505', '23514', '23502', '23503', '42501'].includes(pgError.code)) {
+        reportUnexpectedError(exception);
+      }
       res.status(status).json({
         statusCode: status,
         path: req.url,
@@ -41,6 +51,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return;
     }
 
+    reportUnexpectedError(exception);
     this.logger.error(exception instanceof Error ? exception.stack : exception);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

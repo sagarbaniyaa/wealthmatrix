@@ -2,6 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { initSentry } from './common/sentry';
+
+// Must run before the app (and everything it imports) boots, so Sentry
+// can instrument as much as possible — see common/sentry.ts. A no-op if
+// SENTRY_DSN isn't set.
+initSentry();
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

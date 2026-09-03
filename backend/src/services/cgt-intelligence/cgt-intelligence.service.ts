@@ -9,6 +9,7 @@ import {
 } from '../../database/entities';
 import { FXConversionService } from '../fx-conversion/fx-conversion.service';
 import { CGT_ANNUAL_EXEMPT_AMOUNT, CGT_BASIC_RATE, CGT_HIGHER_RATE, HIGHER_RATE_THRESHOLD_ANNUAL_INCOME } from './cgt-rates.constants';
+import { computeSection104Pool, Section104Transaction } from './section-104';
 
 const CGT_EXEMPT_WRAPPERS = new Set([TaxWrapper.ISA, TaxWrapper.SIPP]);
 const OUT_OF_SCOPE_WRAPPERS = new Set([TaxWrapper.ONSHORE_BOND, TaxWrapper.OFFSHORE_BOND]);
@@ -164,7 +165,7 @@ export class CgtIntelligenceService {
     return this.repo.save(row);
   }
 
-  /** UK Section 104 pooling — a chronological running weighted-average cost. Same-day/30-day "bed and breakfast" matching is NOT implemented (see migration 015). */
+  /** UK share-matching: same-day, then 30-day ("bed and breakfast"), then Section 104 pool — see section-104.ts for the full rules and remaining documented simplifications. */
   private async computeCostBasis(accountId: string, assetId: string, currentQuantity: number | null, baseCurrencyId: string): Promise<{ costBasis: number | null; note: string | null }> {
     const manager = TenantContext.getManager();
     const txns = await manager.getRepository(WealthTransaction).find({
@@ -176,24 +177,25 @@ export class CgtIntelligenceService {
       return { costBasis: null, note: 'No buy/sell transaction history found — cost basis unknown, gain cannot be computed.' };
     }
 
-    let poolQty = 0;
-    let poolCost = 0;
+    const converted: Section104Transaction[] = [];
     for (const txn of txns) {
       const amountBase = txn.amount * (await this.fx.getRate(txn.currencyId, baseCurrencyId, txn.transactionDate));
-      if (txn.transactionType === TransactionType.BUY) {
-        poolQty += Number(txn.quantity ?? 0);
-        poolCost += amountBase;
-      } else if (txn.transactionType === TransactionType.SELL && poolQty > 0) {
-        const avgCost = poolCost / poolQty;
-        const soldQty = Math.min(Number(txn.quantity ?? 0), poolQty);
-        poolCost -= avgCost * soldQty;
-        poolQty -= soldQty;
-      }
+      converted.push({
+        type: txn.transactionType === TransactionType.BUY ? 'buy' : 'sell',
+        date: txn.transactionDate,
+        quantity: Number(txn.quantity ?? 0),
+        amountBase,
+      });
     }
 
+    const { poolQuantity, poolCost, matches } = computeSection104Pool(converted);
+    const bedAndBreakfastCount = matches.filter((m) => m.rule === '30-day').length;
+
     let note: string | null = null;
-    if (currentQuantity !== null && Math.abs(poolQty - Number(currentQuantity)) > 0.0001) {
-      note = `Transaction history (${poolQty.toFixed(4)} units) doesn't match the current holding quantity (${Number(currentQuantity).toFixed(4)}) — cost basis may be incomplete.`;
+    if (currentQuantity !== null && Math.abs(poolQuantity - Number(currentQuantity)) > 0.0001) {
+      note = `Transaction history (${poolQuantity.toFixed(4)} units) doesn't match the current holding quantity (${Number(currentQuantity).toFixed(4)}) — cost basis may be incomplete.`;
+    } else if (bedAndBreakfastCount > 0) {
+      note = `${bedAndBreakfastCount} disposal(s) on this holding were matched under the 30-day "bed and breakfast" rule rather than the general pool.`;
     }
     return { costBasis: poolCost, note };
   }

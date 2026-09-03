@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { DatabaseModule } from './database/database.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -63,6 +64,14 @@ import { AiModule } from './ai/ai.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    // Global default: 100 requests/minute per IP. Deliberately generous —
+    // this is a real adviser workflow tool (dashboards, lists, previews
+    // firing several requests per page load), not a public API; the goal
+    // is stopping abuse/brute-force, not throttling normal use. The one
+    // endpoint that actually needed a much tighter limit — login, the
+    // classic brute-force target — gets its own @Throttle override
+    // directly on AuthController.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     DatabaseModule,
 
     AuthModule,
@@ -120,6 +129,7 @@ import { AiModule } from './ai/ai.module';
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Order matters: JwtAuthGuard (route-level, via @UseGuards) populates
     // req.user BEFORE this global interceptor runs — Nest always resolves
     // guards ahead of interceptors in the request pipeline.

@@ -228,11 +228,14 @@ is the load-bearing piece of this backend — read
 - `services/cgt-intelligence` — CGT & Portfolio Intelligence. Analyses a
   household's PERSONALLY-held investment accounts (entity/trust-held
   assets are out of scope — their CGT treatment is genuinely different
-  and more complex) for unrealised gains, using UK Section 104 pooling
-  (a chronological running weighted-average cost per holding, walked
-  through its `transaction` BUY/SELL history) — same-day/30-day "bed and
-  breakfast" share-matching is NOT implemented, a documented gap, not a
-  silent one. Requires `account.tax_wrapper` to be set (migration 014) —
+  and more complex) for unrealised gains, using the full UK share-
+  matching order: same-day, then the 30-day "bed and breakfast" rule,
+  then the Section 104 pool (`services/cgt-intelligence/section-104.ts`
+  — a chronological running weighted-average cost per holding, walked
+  through its `transaction` BUY/SELL history). Remaining documented
+  simplifications live in that file's own comments (no stock-split/
+  rights-issue handling, same-day multi-disposal interaction). Requires
+  `account.tax_wrapper` to be set (migration 014) —
   an ISA/SIPP is excluded as CGT-exempt, a bond is excluded as taxed on
   chargeable-event gains instead, and an UNSET wrapper is excluded too
   rather than guessed either way, since guessing wrong is worse than
@@ -287,6 +290,53 @@ is the load-bearing piece of this backend — read
   register (scoped the same way `findAllForUser` scopes the household
   list); `GET/POST households/:householdId/consumer-duty` is the
   household-level read-off + review history.
+
+## Testing, security, and monitoring
+
+This platform was built across a single long session, verified by hand
+at every step (real curl calls against a real database — see the git
+history for what each one actually proved). That catches real bugs as
+they're introduced, but it's not the same as a maintained safety net
+for changes made *after* the fact. Three things close part of that gap:
+
+- **`npm test`** — a real Jest unit suite (not scaffolding) for the
+  deterministic engines: CGT (including the full UK same-day/30-day/
+  Section 104 share-matching order — `section-104.spec.ts`), DFM mandate
+  weighting, the ATR risk questionnaire scoring, charge projections, and
+  the retirement Monte Carlo model. Pure functions, no DB — fast on
+  purpose, meant to run on every change. `npm run test:integration`
+  boots the actual app (the real module graph, not a mock) against
+  whatever Postgres `DB_HOST` points at, and drives it with supertest —
+  covers JWT auth enforcement (including a forged-signature rejection),
+  multi-tenant isolation (a token for a nonexistent firm gets zero rows,
+  never another firm's), and that household-scoped endpoints degrade
+  cleanly on empty data rather than crashing. `npm run test:all` runs
+  both. None of this is a substitute for independent penetration
+  testing — it's the layer that exists *before* that conversation is
+  worth having.
+- **Rate limiting** (`@nestjs/throttler`) — 100 requests/minute per IP
+  by default (generous — this is an adviser workflow tool, not a public
+  API), with a much tighter 5/minute specifically on `/auth/login`,
+  the classic brute-force/credential-stuffing target and the one
+  endpoint reachable with no auth at all.
+- **A closed access-control gap**: `HouseholdService.ensureAccessible`
+  (an adviser can only reach households they're actually assigned to,
+  beyond what firm-level RLS alone enforces) was applied to every NEW
+  household-scoped controller built this session, but four OLDER ones
+  — scenarios, risk-exposure, compliance-log, entities — relied on
+  firm-level RLS alone, meaning any adviser in the firm could reach
+  another adviser's household's scenarios/risk data by guessing an id.
+  All four now call `ensureAccessible` (or an equivalent access check)
+  before returning anything. `entity`'s ownership-graph case (an entity
+  reached only through another entity, with no direct household link)
+  remains a documented, not silently ignored, gap — see the controller's
+  own comment.
+- **Sentry** (`common/sentry.ts`) — optional, free tier, reports only
+  genuine unexpected errors (an unhandled exception, or a database error
+  code this backend doesn't recognise), never routine 400/403/404s. This
+  is the thing that would have caught the missing-migration-010 bug that
+  broke Document Intake on the live site the moment it happened, instead
+  of waiting for a user to report it.
 
 ## Running it
 

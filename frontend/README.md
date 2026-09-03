@@ -587,10 +587,12 @@ basis, compared against current market value for the unrealised gain.
   specific holding cheapest to sell, which ones already carry zero CGT,
   the one with the largest gain worth leaving alone, and exactly how
   much of this year's unused allowance could be realised tax-free.
-- **Known, documented gap**: the 30-day "bed and breakfast" share-
-  matching rule (selling and repurchasing the same holding within 30
-  days) isn't implemented — an edge case that would mis-cost a holding
-  if it applies. Flagged in the module's own code comments, not hidden.
+- **Full UK share-matching order implemented**: same-day, then the
+  30-day "bed and breakfast" rule (selling and repurchasing the same
+  holding within 30 days), then the Section 104 pool — in that order,
+  as HMRC requires. Remaining simplifications (stock splits/rights
+  issues, multiple same-day disposals interacting) are documented in
+  the backend's `section-104.ts`, not silently ignored.
 
 ### DFM & Fund Category Recommendation
 
@@ -729,10 +731,14 @@ npm run dev
 
 - **Password reset** is a placeholder page on both login flows — no
   token-based reset endpoint exists on the backend yet.
-- **RBAC hardening is partial**: adviser-household-assignment is enforced
-  for `households/:id` and `net-worth`, but not yet for every other
-  household-scoped endpoint (scenarios, compliance-log, risk-exposure) —
-  those still only enforce the firm boundary via RLS.
+- **RBAC hardening — closed for the endpoints that had it documented as
+  missing**: scenarios, risk-exposure, compliance-log, and entities (the
+  ones explicitly called out here previously) now all enforce adviser-
+  household-assignment via `ensureAccessible`, same as `households/:id`
+  and `net-worth`. One narrower case remains, documented in
+  `EntityController`'s own comment: an entity reached only through
+  another entity's ownership graph (no direct `household_id` of its
+  own) still relies on firm-level RLS alone.
 - **Postgres `NUMERIC` columns return as strings** from the driver
   (`ownershipPct`, `income.amount`, `holding.marketValue` all hit this) —
   every known call site now coerces with `Number(...)`, but a new call

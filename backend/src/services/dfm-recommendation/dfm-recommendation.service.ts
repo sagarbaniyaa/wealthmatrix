@@ -234,8 +234,8 @@ function ageFromDob(dob: string): number | null {
   return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
 }
 
-/** Moves `amount` percentage points from `from` categories into `to` categories, proportionally within each group. Adds a `to` category at 0 first if it isn't already present. */
-function shiftWeight(categories: FundCategoryWeight[], from: string[], to: string[], amount: number): FundCategoryWeight[] {
+/** Moves `amount` percentage points from `from` categories into `to` categories, proportionally within each group. Adds a `to` category at 0 first if it isn't already present. Exported for unit testing (dfm-recommendation.service.spec.ts) — pure function, no DB/network dependency. */
+export function shiftWeight(categories: FundCategoryWeight[], from: string[], to: string[], amount: number): FundCategoryWeight[] {
   const working = categories.map((c) => ({ ...c }));
   const fromTotal = working.filter((c) => from.includes(c.category)).reduce((sum, c) => sum + c.weightPct, 0);
   if (fromTotal <= 0) return working;
@@ -258,8 +258,8 @@ function shiftWeight(categories: FundCategoryWeight[], from: string[], to: strin
   return working.filter((c) => c.weightPct > 0.01);
 }
 
-/** Rounds every weight to the nearest whole percent and corrects rounding drift on the largest bucket so the total is exactly 100. */
-function normalizeWeights(categories: FundCategoryWeight[]): FundCategoryWeight[] {
+/** Rounds every weight to the nearest whole percent and corrects rounding drift on the largest bucket so the total is exactly 100. Exported for unit testing — see shiftWeight above. */
+export function normalizeWeights(categories: FundCategoryWeight[]): FundCategoryWeight[] {
   const rounded = categories.map((c) => ({ category: c.category, weightPct: Math.round(c.weightPct) })).filter((c) => c.weightPct > 0);
   const total = rounded.reduce((sum, c) => sum + c.weightPct, 0);
   const drift = 100 - total;
