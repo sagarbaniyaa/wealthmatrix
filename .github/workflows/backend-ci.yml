@@ -1,0 +1,90 @@
+name: Backend CI
+
+# Runs on every push/PR touching the backend — the actual safety net for
+# the test suite added this session. Before this workflow existed,
+# nothing stopped a broken change from being merged; the tests only ran
+# if someone remembered to run them by hand.
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**']
+  pull_request:
+    paths: ['backend/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # A real, throwaway Postgres — restored from db/full_dump.sql, the
+    # same "fresh environment" path the backend README's own setup
+    # instructions use. There is no standalone base-schema migration in
+    # this repo (migrations/002 onward are incremental ON TOP of what
+    # full_dump.sql already contains — see backend/README.md), so
+    # full_dump.sql is the only complete schema definition to start from.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wealthmatrix_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      PGPASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Restore the full schema + demo data (same file `npm run start:dev`'s own setup instructions use)
+        run: psql -h localhost -U postgres -d wealthmatrix_ci -v ON_ERROR_STOP=1 -f db/full_dump.sql
+
+      # full_dump.sql is taken with --no-owner --no-privileges, so it
+      # never references wealthmatrix_app — create that role fresh here,
+      # matching what a real deployment's DB setup does, so RLS is
+      # actually exercised by a non-superuser connection (a superuser
+      # bypasses RLS entirely, which would make the multi-tenant-
+      # isolation integration test pass or fail for the wrong reason).
+      - name: Create the non-superuser app role and grant it the schema
+        run: |
+          psql -h localhost -U postgres -d wealthmatrix_ci -c "
+            CREATE ROLE wealthmatrix_app LOGIN PASSWORD 'postgres';
+            GRANT ALL ON ALL TABLES IN SCHEMA public TO wealthmatrix_app;
+            GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO wealthmatrix_app;
+          "
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run integration tests (against the real app + the real schema, as the real non-superuser app role)
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: wealthmatrix_app
+          DB_PASSWORD: postgres
+          DB_DATABASE: wealthmatrix_ci
+          JWT_SECRET: ci-test-secret-not-used-anywhere-real
+        run: npm run test:integration
+
+      - name: Audit for new HIGH/CRITICAL runtime vulnerabilities (fails the build on a NEW one, not the known/documented dev-tooling-only ones)
+        run: npm audit --omit=dev --audit-level=high
