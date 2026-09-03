@@ -171,7 +171,37 @@ is the load-bearing piece of this backend — read
   poller gets a correctly tenant-scoped `EntityManager` despite having
   no HTTP request behind it (it loops every firm via the RLS-exempt
   `firm` table, then opens a proper tenant transaction per firm).
-- `services/call-session` — "Start Client Call". Two deliberately
+- `services/telephony` — real outbound calling ("Call Client"), separate
+  from `services/call-session`'s transcription (see below for how they
+  relate). Uses Twilio's "click-to-call bridge" pattern: the platform
+  rings the ADVISER's own phone first (a normal call, no app/softphone
+  needed), and once they answer, `<Dial>`s the client's number in —
+  never a browser-based WebRTC dialer, which would need its own
+  capability-token auth and audio plumbing this platform doesn't take
+  on. Client/adviser numbers come from `person.phone`/`app_user.phone`
+  (both pre-existing columns; `app_user.phone` gained its first real
+  UI in this pass — `PATCH users/me`, self-service only, never another
+  user's record). Call status (ringing/answered/completed/duration)
+  arrives asynchronously via `POST /telephony/status-callback` — a
+  webhook Twilio calls directly, so it has no JWT; authenticity is
+  instead verified via Twilio's own HMAC request-signature scheme
+  (`twilio.validateRequest`, checked against the exact public URL —
+  hence `app.set('trust proxy', true)` in `main.ts`, required for
+  `req.protocol`/`req.get('host')` to report correctly behind Render's
+  reverse proxy). `firm_id` travels in that webhook's query string
+  because `client_call_log` is RLS-protected and the webhook has no
+  other way to establish tenant context before reading it — see
+  `common/database/run-in-tenant-context.ts` (the same helper the email
+  poller's `@Cron` job uses, for the same reason: a non-HTTP or
+  externally-triggered entry point still needs one). Append-only
+  (`client_call_log`, migration 016). Requires a real Twilio account —
+  see `.env.example` for the exact setup steps; degrades to a clear 503
+  if unconfigured, same as every other optional integration here.
+- `services/call-session` — "Start Client Call" (live TEXT
+  transcription — unrelated to whether Telephony is configured; you can
+  transcribe a call placed any other way, or transcribe the actual
+  Telephony-placed call if you have the page open and aren't on a
+  headset). Two deliberately
   separate pieces:
   1. **Live suggestions** (`call-suggestion.constants.ts` +
      `getSuggestions()`) — deterministic keyword matching over the

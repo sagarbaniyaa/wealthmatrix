@@ -508,6 +508,31 @@ inbox and re-uploading attachments by hand.
   while testing).
 - Credentials are encrypted at rest, never shown again after saving.
 
+### Telephony (real outbound calling)
+
+**"Call Client"** button at the top of the Client Call page — this
+actually dials, unlike the transcription below it. Twilio rings YOUR
+phone first (a normal call — no app, no browser audio); once you pick
+up, it bridges the client's number in automatically. The card shows
+live status (ringing → in progress → completed) and call history.
+
+- **Set your own phone number first**: Settings → My Profile. The
+  platform can't ring you without it — the button gives a clear error
+  naming exactly what's missing (your number, or the client's) rather
+  than failing silently.
+- **The client's number** comes from their existing profile — the same
+  phone field already on the Client Profile page, nothing new to fill
+  in there.
+- **Needs a real Twilio account** to do anything — this is genuine
+  telephony with a real (small) ongoing cost, not a free feature like
+  everything else built this session. Without it configured, the
+  button returns a clear "not configured" message. See the backend
+  README/`.env.example` for the exact setup steps (you create the
+  Twilio account yourself; we can't do that on your behalf).
+- **Free-trial accounts can only call verified numbers** — Twilio's own
+  restriction, not this platform's: verify both the adviser's and any
+  test client's number in the Twilio console before trying this.
+
 ### Client Call
 
 **`/advisor/households/[id]/call`** — click "Start Client Call" and talk

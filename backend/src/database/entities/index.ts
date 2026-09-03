@@ -38,3 +38,4 @@ export * from './dfm-recommendation.entity';
 export * from './household-action.entity';
 export * from './adviser-email-connection.entity';
 export * from './cgt-analysis.entity';
+export * from './client-call-log.entity';

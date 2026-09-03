@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6sFk75bQWndKyzohBeHUuWU1HiCJMtPB6RU6TKs1MNRA0JzsbWoMHpIPWS2SdNC
+\restrict EEaDT3nSTHKg6chVeoyIs9l6U5d5LDshYh45qageeZjhQwNIG9fhGZUhG6QX2wG
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -376,6 +376,31 @@ CREATE TABLE public.charge_projection (
 );
 
 ALTER TABLE ONLY public.charge_projection FORCE ROW LEVEL SECURITY;
+
+
+--
+-- Name: client_call_log; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.client_call_log (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    household_id uuid NOT NULL,
+    adviser_id uuid NOT NULL,
+    client_person_id uuid NOT NULL,
+    to_number text NOT NULL,
+    from_number text NOT NULL,
+    adviser_number text NOT NULL,
+    twilio_call_sid text,
+    status text DEFAULT 'initiated'::text NOT NULL,
+    duration_seconds integer,
+    error_message text,
+    initiated_by uuid,
+    initiated_at timestamp with time zone DEFAULT now() NOT NULL,
+    ended_at timestamp with time zone
+);
+
+ALTER TABLE ONLY public.client_call_log FORCE ROW LEVEL SECURITY;
 
 
 --
@@ -1122,8 +1147,8 @@ e0738c0c-42d1-4734-969b-ac94c6e899a2	524e600b-d62d-469d-b697-22ced0fbcc07	3579dd
 COPY public.app_user (id, firm_id, email, role, person_id, is_active, created_at, updated_at, password_hash, display_name, phone, address_line1, city, postal_code) FROM stdin;
 1dd97a4a-2d2d-4f66-a6b4-93edda311e1c	524e600b-d62d-469d-b697-22ced0fbcc07	adviser2@wealthmatrix.local	adviser	\N	f	2026-08-27 15:49:44.97552+01	2026-08-27 15:51:25.427987+01	$2b$12$vg3YJ5IDMQ6Q/Sqy2GMPZ.63bB9WRpexJpHT4y1kN9UtK0mkcGJUW	\N	\N	\N	\N	\N
 4e618b57-c6d7-45d5-8f5d-1583df4403ae	524e600b-d62d-469d-b697-22ced0fbcc07	client@wealthmatrix.local	client	ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c	t	2026-08-26 16:26:55.770432+01	2026-08-28 10:23:29.723322+01	$2b$10$0Ux03VLqnoION9yhElzSEuLH9VFqglXFINBwM/96aklIlLMd8UJdG	\N	\N	\N	\N	\N
-0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	524e600b-d62d-469d-b697-22ced0fbcc07	admin@wealthmatrix.local	admin	\N	t	2026-08-26 16:26:55.770432+01	2026-08-28 10:23:29.723322+01	$2b$10$0Ux03VLqnoION9yhElzSEuLH9VFqglXFINBwM/96aklIlLMd8UJdG	\N	\N	\N	\N	\N
 3579ddda-bee0-490a-9a68-6a15424a667a	524e600b-d62d-469d-b697-22ced0fbcc07	adviser@wealthmatrix.local	adviser	\N	t	2026-08-26 16:26:55.770432+01	2026-08-28 12:01:58.59598+01	$2b$10$0Ux03VLqnoION9yhElzSEuLH9VFqglXFINBwM/96aklIlLMd8UJdG	Jordan Reeves	020 7946 0958	1 Fleet Street	London	EC4Y 1AA
+0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	524e600b-d62d-469d-b697-22ced0fbcc07	admin@wealthmatrix.local	admin	\N	t	2026-08-26 16:26:55.770432+01	2026-09-03 11:31:27.930857+01	$2b$10$0Ux03VLqnoION9yhElzSEuLH9VFqglXFINBwM/96aklIlLMd8UJdG	\N	\N	\N	\N	\N
 \.
 
 
@@ -1348,6 +1373,19 @@ cad744a1-9c47-4f7b-a91e-f04bc4b0d825	524e600b-d62d-469d-b697-22ced0fbcc07	househ
 76202763-e44b-4291-9c53-71fdf3eef47e	524e600b-d62d-469d-b697-22ced0fbcc07	account	22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-08-26T16:26:55.770432+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": null, "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-09-03T09:59:02.349239+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": "GIA", "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	2026-09-03 09:59:02.349239+01
 c5c824ab-6f16-4178-b47b-626afec1d064	524e600b-d62d-469d-b697-22ced0fbcc07	transaction	7838e769-f54d-4d4e-bed7-d3254b3e4697	INSERT	\N	\N	{"id": "7838e769-f54d-4d4e-bed7-d3254b3e4697", "amount": 1800000.00, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "asset_id": "fb5cad1f-b9fd-4b55-9884-a17867f91cf4", "quantity": 1.00000000, "account_id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "created_at": "2026-09-03T09:59:12.018118+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "description": "Test BUY for CGT verification", "external_ref": null, "transaction_date": "2020-01-01", "transaction_type": "buy"}	2026-09-03 09:59:12.018118+01
 dd95974a-af65-40c7-a842-e385fcc06226	524e600b-d62d-469d-b697-22ced0fbcc07	account	22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc	UPDATE	\N	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-09-03T09:59:02.349239+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": "GIA", "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-09-03T09:59:38.621988+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": null, "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	2026-09-03 09:59:38.621988+01
+71f276b8-031c-45ac-aecd-7b017770a4e9	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	1dd98b5d-4bd4-4e07-8ce8-fa79ac740112	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x436c69656e742073616964207468656972206e616d652069732045647761726420576869746d6f72652c20626f726e203132204d6172636820313936352e20546865792077616e7420746f207472616e73666572207468656972206f6c642070656e73696f6e2066726f6d20417669766120746f2061206e65772070726f766964657220666f72206c6f77657220636861726765732c20616e6420746865792061726520706c616e6e696e6720746f2072657469726520696e20323033302e205468657920616c736f206d656e74696f6e65642074686579206172652067657474696e67206d617272696564206e657874207965617220616e642061726520776f72726965642061626f7574206361706974616c206761696e7320746178206f6e207468656972207368617265732e", "file_name": "call-transcript-2026-09-03.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-03T10:22:11.1+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "CALL_TRANSCRIPT", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "pending"}	2026-09-03 10:22:11.1+01
+5ec975fc-c276-433a-a0b9-82ba621c8027	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	1dd98b5d-4bd4-4e07-8ce8-fa79ac740112	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x436c69656e742073616964207468656972206e616d652069732045647761726420576869746d6f72652c20626f726e203132204d6172636820313936352e20546865792077616e7420746f207472616e73666572207468656972206f6c642070656e73696f6e2066726f6d20417669766120746f2061206e65772070726f766964657220666f72206c6f77657220636861726765732c20616e6420746865792061726520706c616e6e696e6720746f2072657469726520696e20323033302e205468657920616c736f206d656e74696f6e65642074686579206172652067657474696e67206d617272696564206e657874207965617220616e642061726520776f72726965642061626f7574206361706974616c206761696e7320746178206f6e207468656972207368617265732e", "file_name": "call-transcript-2026-09-03.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-03T10:22:11.1+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "CALL_TRANSCRIPT", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "pending"}	{"id": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x436c69656e742073616964207468656972206e616d652069732045647761726420576869746d6f72652c20626f726e203132204d6172636820313936352e20546865792077616e7420746f207472616e73666572207468656972206f6c642070656e73696f6e2066726f6d20417669766120746f2061206e65772070726f766964657220666f72206c6f77657220636861726765732c20616e6420746865792061726520706c616e6e696e6720746f2072657469726520696e20323033302e205468657920616c736f206d656e74696f6e65642074686579206172652067657474696e67206d617272696564206e657874207965617220616e642061726520776f72726965642061626f7574206361706974616c206761696e7320746178206f6e207468656972207368617265732e", "file_name": "call-transcript-2026-09-03.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-03T10:22:11.1+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "CALL_TRANSCRIPT", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "processing"}	2026-09-03 10:22:11.1+01
+2a7455aa-0f7b-4e4d-a164-2f49b7d541f7	524e600b-d62d-469d-b697-22ced0fbcc07	compliance_log	d7ed9b7d-c012-4711-b555-f28e3bfc09d3	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "d7ed9b7d-c012-4711-b555-f28e3bfc09d3", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "Could not extract usable Fact Find data from this document.", "metadata": {"fileName": "call-transcript-2026-09-03.txt", "documentId": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "documentType": "CALL_TRANSCRIPT"}, "severity": "info", "entity_id": null, "rule_code": "DOCUMENT_INTAKE", "detected_at": "2026-09-03T10:22:12.001+01:00", "resolved_at": null, "resolved_by": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	2026-09-03 10:22:11.1+01
+6309beb6-3994-4788-bac1-f8783f217a08	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	1dd98b5d-4bd4-4e07-8ce8-fa79ac740112	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x436c69656e742073616964207468656972206e616d652069732045647761726420576869746d6f72652c20626f726e203132204d6172636820313936352e20546865792077616e7420746f207472616e73666572207468656972206f6c642070656e73696f6e2066726f6d20417669766120746f2061206e65772070726f766964657220666f72206c6f77657220636861726765732c20616e6420746865792061726520706c616e6e696e6720746f2072657469726520696e20323033302e205468657920616c736f206d656e74696f6e65642074686579206172652067657474696e67206d617272696564206e657874207965617220616e642061726520776f72726965642061626f7574206361706974616c206761696e7320746178206f6e207468656972207368617265732e", "file_name": "call-transcript-2026-09-03.txt", "mime_type": "text/plain", "applied_at": null, "created_at": "2026-09-03T10:22:11.1+01:00", "parsed_data": {}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "CALL_TRANSCRIPT", "extracted_text": null, "applied_summary": null, "extraction_error": null, "extraction_status": "processing"}	{"id": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x436c69656e742073616964207468656972206e616d652069732045647761726420576869746d6f72652c20626f726e203132204d6172636820313936352e20546865792077616e7420746f207472616e73666572207468656972206f6c642070656e73696f6e2066726f6d20417669766120746f2061206e65772070726f766964657220666f72206c6f77657220636861726765732c20616e6420746865792061726520706c616e6e696e6720746f2072657469726520696e20323033302e205468657920616c736f206d656e74696f6e65642074686579206172652067657474696e67206d617272696564206e657874207965617220616e642061726520776f72726965642061626f7574206361706974616c206761696e7320746178206f6e207468656972207368617265732e", "file_name": "call-transcript-2026-09-03.txt", "mime_type": "text/plain", "applied_at": "2026-09-03T10:22:12.001+01:00", "created_at": "2026-09-03T10:22:11.1+01:00", "parsed_data": {"factFind": null, "identity": null}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "CALL_TRANSCRIPT", "extracted_text": "Client said their name is Edward Whitmore, born 12 March 1965. They want to transfer their old pension from Aviva to a new provider for lower charges, and they are planning to retire in 2030. They also mentioned they are getting married next year and are worried about capital gains tax on their shares.", "applied_summary": "Could not extract usable Fact Find data from this document.", "extraction_error": null, "extraction_status": "done"}	2026-09-03 10:22:11.1+01
+d91b2b74-3f09-45fd-9af9-cfc8204192d2	524e600b-d62d-469d-b697-22ced0fbcc07	client_document	1dd98b5d-4bd4-4e07-8ce8-fa79ac740112	DELETE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "source": "uploaded", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "file_data": "\\\\x436c69656e742073616964207468656972206e616d652069732045647761726420576869746d6f72652c20626f726e203132204d6172636820313936352e20546865792077616e7420746f207472616e73666572207468656972206f6c642070656e73696f6e2066726f6d20417669766120746f2061206e65772070726f766964657220666f72206c6f77657220636861726765732c20616e6420746865792061726520706c616e6e696e6720746f2072657469726520696e20323033302e205468657920616c736f206d656e74696f6e65642074686579206172652067657474696e67206d617272696564206e657874207965617220616e642061726520776f72726965642061626f7574206361706974616c206761696e7320746178206f6e207468656972207368617265732e", "file_name": "call-transcript-2026-09-03.txt", "mime_type": "text/plain", "applied_at": "2026-09-03T10:22:12.001+01:00", "created_at": "2026-09-03T10:22:11.1+01:00", "parsed_data": {"factFind": null, "identity": null}, "uploaded_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "document_type": "CALL_TRANSCRIPT", "extracted_text": "Client said their name is Edward Whitmore, born 12 March 1965. They want to transfer their old pension from Aviva to a new provider for lower charges, and they are planning to retire in 2030. They also mentioned they are getting married next year and are worried about capital gains tax on their shares.", "applied_summary": "Could not extract usable Fact Find data from this document.", "extraction_error": null, "extraction_status": "done"}	\N	2026-09-03 10:22:56.771389+01
+ab9e99c1-bc14-4402-bb5e-6dce9b038eed	524e600b-d62d-469d-b697-22ced0fbcc07	compliance_log	d7ed9b7d-c012-4711-b555-f28e3bfc09d3	DELETE	\N	{"id": "d7ed9b7d-c012-4711-b555-f28e3bfc09d3", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "Could not extract usable Fact Find data from this document.", "metadata": {"fileName": "call-transcript-2026-09-03.txt", "documentId": "1dd98b5d-4bd4-4e07-8ce8-fa79ac740112", "documentType": "CALL_TRANSCRIPT"}, "severity": "info", "entity_id": null, "rule_code": "DOCUMENT_INTAKE", "detected_at": "2026-09-03T10:22:12.001+01:00", "resolved_at": null, "resolved_by": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	\N	2026-09-03 10:22:57.120753+01
+2b6297a1-adbc-489f-b8d2-b59201d514b4	524e600b-d62d-469d-b697-22ced0fbcc07	person	bba896f2-bf19-4fd9-9d45-4877506217d5	UPDATE	\N	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": null, "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-02T17:39:15.552113+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": null, "kyc_verified_at": null, "source_of_wealth": null}	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": "+447700900002", "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-03T11:24:11.162573+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": null, "kyc_verified_at": null, "source_of_wealth": null}	2026-09-03 11:24:11.162573+01
+cacd7f47-a0ae-4e12-b528-1caca54521ec	524e600b-d62d-469d-b697-22ced0fbcc07	client_call_log	f5512852-ee20-4fa7-b868-3af7a82b42f7	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "f5512852-ee20-4fa7-b868-3af7a82b42f7", "status": "initiated", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "ended_at": null, "to_number": "+447700900002", "adviser_id": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "from_number": "+15005550006", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "initiated_at": "2026-09-03T11:24:11.372294+01:00", "initiated_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "error_message": null, "adviser_number": "+447700900001", "twilio_call_sid": null, "client_person_id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "duration_seconds": null}	2026-09-03 11:24:11.372294+01
+12c2c601-e6ad-4e6c-9748-7f6fda6ae19a	524e600b-d62d-469d-b697-22ced0fbcc07	client_call_log	f5512852-ee20-4fa7-b868-3af7a82b42f7	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "f5512852-ee20-4fa7-b868-3af7a82b42f7", "status": "initiated", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "ended_at": null, "to_number": "+447700900002", "adviser_id": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "from_number": "+15005550006", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "initiated_at": "2026-09-03T11:24:11.372294+01:00", "initiated_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "error_message": null, "adviser_number": "+447700900001", "twilio_call_sid": null, "client_person_id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "duration_seconds": null}	{"id": "f5512852-ee20-4fa7-b868-3af7a82b42f7", "status": "failed", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "ended_at": "2026-09-03T11:24:15.663+01:00", "to_number": "+447700900002", "adviser_id": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "from_number": "+15005550006", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "initiated_at": "2026-09-03T11:24:11.372294+01:00", "initiated_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "error_message": "Authentication Error - invalid username", "adviser_number": "+447700900001", "twilio_call_sid": null, "client_person_id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "duration_seconds": null}	2026-09-03 11:24:11.372294+01
+75e69c22-c1d8-4530-8929-449b0f60e28d	524e600b-d62d-469d-b697-22ced0fbcc07	compliance_log	274d16fd-32a5-431c-9ab5-1d5177c88f5d	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "274d16fd-32a5-431c-9ab5-1d5177c88f5d", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "Outbound call to +447700900002 failed: Authentication Error - invalid username", "metadata": {"callLogId": "f5512852-ee20-4fa7-b868-3af7a82b42f7", "twilioCallSid": null}, "severity": "warning", "entity_id": null, "rule_code": "CLIENT_CALL_PLACED", "detected_at": "2026-09-03T11:24:15.681+01:00", "resolved_at": null, "resolved_by": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	2026-09-03 11:24:11.372294+01
+0d62f509-3cf8-453c-ba8b-51ef63fd9fa6	524e600b-d62d-469d-b697-22ced0fbcc07	client_call_log	f5512852-ee20-4fa7-b868-3af7a82b42f7	DELETE	\N	{"id": "f5512852-ee20-4fa7-b868-3af7a82b42f7", "status": "failed", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "ended_at": "2026-09-03T11:24:15.663+01:00", "to_number": "+447700900002", "adviser_id": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "from_number": "+15005550006", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "initiated_at": "2026-09-03T11:24:11.372294+01:00", "initiated_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "error_message": "Authentication Error - invalid username", "adviser_number": "+447700900001", "twilio_call_sid": null, "client_person_id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "duration_seconds": null}	\N	2026-09-03 11:24:35.564943+01
+854ace5e-b5c1-4966-812f-703053165d79	524e600b-d62d-469d-b697-22ced0fbcc07	compliance_log	274d16fd-32a5-431c-9ab5-1d5177c88f5d	DELETE	\N	{"id": "274d16fd-32a5-431c-9ab5-1d5177c88f5d", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "message": "Outbound call to +447700900002 failed: Authentication Error - invalid username", "metadata": {"callLogId": "f5512852-ee20-4fa7-b868-3af7a82b42f7", "twilioCallSid": null}, "severity": "warning", "entity_id": null, "rule_code": "CLIENT_CALL_PLACED", "detected_at": "2026-09-03T11:24:15.681+01:00", "resolved_at": null, "resolved_by": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	\N	2026-09-03 11:24:35.564943+01
+b1867e4a-4bed-484b-9822-870ddf6e4829	524e600b-d62d-469d-b697-22ced0fbcc07	person	bba896f2-bf19-4fd9-9d45-4877506217d5	UPDATE	\N	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": "+447700900002", "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-03T11:24:11.162573+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": null, "kyc_verified_at": null, "source_of_wealth": null}	{"id": "bba896f2-bf19-4fd9-9d45-4877506217d5", "city": null, "email": null, "phone": null, "country": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "domicile": "GB", "is_active": true, "last_name": "Whitmore", "ni_number": null, "created_at": "2026-08-27T14:18:24.801771+01:00", "first_name": "Edward", "kyc_status": "pending", "updated_at": "2026-09-03T11:24:35.564943+01:00", "postal_code": null, "address_line1": null, "address_line2": null, "date_of_birth": null, "tax_residency": "GB", "risk_tolerance": null, "kyc_verified_at": null, "source_of_wealth": null}	2026-09-03 11:24:35.564943+01
 \.
 
 
@@ -1364,6 +1402,14 @@ COPY public.cgt_analysis (id, firm_id, household_id, as_of_date, per_person, rec
 --
 
 COPY public.charge_projection (id, firm_id, household_id, name, old_arrangement, new_arrangement, assumptions, results, ai_narrative, ai_narrative_error, created_by, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: client_call_log; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.client_call_log (id, firm_id, household_id, adviser_id, client_person_id, to_number, from_number, adviser_number, twilio_call_sid, status, duration_seconds, error_message, initiated_by, initiated_at, ended_at) FROM stdin;
 \.
 
 
@@ -1619,7 +1665,7 @@ COPY public.loa_template (id, firm_id, name, file_name, mime_type, file_data, fi
 COPY public.person (id, firm_id, first_name, last_name, date_of_birth, tax_residency, domicile, is_active, created_at, updated_at, phone, email, address_line1, address_line2, city, postal_code, country, risk_tolerance, kyc_status, kyc_verified_at, source_of_wealth, ni_number) FROM stdin;
 df10227b-e170-413e-8171-af63cc6248c2	524e600b-d62d-469d-b697-22ced0fbcc07	Mike 	Scott	\N	United Kingdom	\N	t	2026-08-27 14:29:20.284349+01	2026-08-27 14:46:14.464307+01	\N	\N	\N	\N	\N	\N	\N	\N	pending	\N	\N	\N
 ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c	524e600b-d62d-469d-b697-22ced0fbcc07	Alexandra	Sterling	\N	GB	GB	t	2026-08-26 16:26:55.770432+01	2026-08-28 13:56:46.483566+01	+44 20 7946 0958	alexandra.sterling@example.com	\N	\N	London	\N	\N	moderate	verified	\N	Sale of family business	QQ123456C
-bba896f2-bf19-4fd9-9d45-4877506217d5	524e600b-d62d-469d-b697-22ced0fbcc07	Edward	Whitmore	\N	GB	GB	t	2026-08-27 14:18:24.801771+01	2026-09-02 17:39:15.552113+01	\N	\N	\N	\N	\N	\N	\N	\N	pending	\N	\N	\N
+bba896f2-bf19-4fd9-9d45-4877506217d5	524e600b-d62d-469d-b697-22ced0fbcc07	Edward	Whitmore	\N	GB	GB	t	2026-08-27 14:18:24.801771+01	2026-09-03 11:24:35.564943+01	\N	\N	\N	\N	\N	\N	\N	\N	pending	\N	\N	\N
 \.
 
 
@@ -1813,6 +1859,14 @@ ALTER TABLE ONLY public.cgt_analysis
 
 ALTER TABLE ONLY public.charge_projection
     ADD CONSTRAINT charge_projection_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: client_call_log client_call_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_call_log
+    ADD CONSTRAINT client_call_log_pkey PRIMARY KEY (id);
 
 
 --
@@ -2228,6 +2282,27 @@ CREATE INDEX idx_charge_projection_household ON public.charge_projection USING b
 
 
 --
+-- Name: idx_client_call_log_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_client_call_log_firm ON public.client_call_log USING btree (firm_id);
+
+
+--
+-- Name: idx_client_call_log_household; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_client_call_log_household ON public.client_call_log USING btree (household_id);
+
+
+--
+-- Name: idx_client_call_log_sid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_client_call_log_sid ON public.client_call_log USING btree (twilio_call_sid);
+
+
+--
 -- Name: idx_client_document_firm; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2624,6 +2699,13 @@ CREATE TRIGGER trg_audit_cgt_analysis AFTER INSERT OR DELETE OR UPDATE ON public
 --
 
 CREATE TRIGGER trg_audit_charge_projection AFTER INSERT OR DELETE OR UPDATE ON public.charge_projection FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
+
+
+--
+-- Name: client_call_log trg_audit_client_call_log; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_audit_client_call_log AFTER INSERT OR DELETE OR UPDATE ON public.client_call_log FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
 
 
 --
@@ -3104,6 +3186,46 @@ ALTER TABLE ONLY public.charge_projection
 
 ALTER TABLE ONLY public.charge_projection
     ADD CONSTRAINT charge_projection_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
+
+
+--
+-- Name: client_call_log client_call_log_adviser_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_call_log
+    ADD CONSTRAINT client_call_log_adviser_id_fkey FOREIGN KEY (adviser_id) REFERENCES public.app_user(id);
+
+
+--
+-- Name: client_call_log client_call_log_client_person_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_call_log
+    ADD CONSTRAINT client_call_log_client_person_id_fkey FOREIGN KEY (client_person_id) REFERENCES public.person(id);
+
+
+--
+-- Name: client_call_log client_call_log_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_call_log
+    ADD CONSTRAINT client_call_log_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: client_call_log client_call_log_household_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_call_log
+    ADD CONSTRAINT client_call_log_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
+
+
+--
+-- Name: client_call_log client_call_log_initiated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.client_call_log
+    ADD CONSTRAINT client_call_log_initiated_by_fkey FOREIGN KEY (initiated_by) REFERENCES public.app_user(id);
 
 
 --
@@ -3851,6 +3973,12 @@ ALTER TABLE public.cgt_analysis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.charge_projection ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: client_call_log; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.client_call_log ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: client_document; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -4075,6 +4203,13 @@ CREATE POLICY tenant_isolation_charge_projection ON public.charge_projection USI
 
 
 --
+-- Name: client_call_log tenant_isolation_client_call_log; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_client_call_log ON public.client_call_log USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
 -- Name: client_document tenant_isolation_client_document; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -4287,5 +4422,5 @@ ALTER TABLE public.transaction ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6sFk75bQWndKyzohBeHUuWU1HiCJMtPB6RU6TKs1MNRA0JzsbWoMHpIPWS2SdNC
+\unrestrict EEaDT3nSTHKg6chVeoyIs9l6U5d5LDshYh45qageeZjhQwNIG9fhGZUhG6QX2wG
 

@@ -10,6 +10,15 @@ export interface SessionUser {
   personId: string | null;
 }
 
+export interface AppUser {
+  id: string;
+  email: string;
+  role: Role;
+  displayName: string | null;
+  phone: string | null;
+  isActive: boolean;
+}
+
 export interface Household {
   id: string;
   name: string;
@@ -604,6 +613,22 @@ export interface CgtAnalysis {
   recommendations: CgtRecommendation[];
   gaps: string[];
   createdAt: string;
+}
+
+// Telephony — real outbound calling via Twilio
+
+export type CallStatus = 'initiated' | 'ringing' | 'in-progress' | 'completed' | 'failed' | 'no-answer' | 'busy' | 'canceled';
+export interface ClientCallLog {
+  id: string;
+  householdId: string;
+  toNumber: string;
+  adviserNumber: string;
+  twilioCallSid: string | null;
+  status: CallStatus;
+  durationSeconds: number | null;
+  errorMessage: string | null;
+  initiatedAt: string;
+  endedAt: string | null;
 }
 
 // Client Action Selector

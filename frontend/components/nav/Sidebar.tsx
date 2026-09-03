@@ -11,6 +11,7 @@ const ADVISER_LINKS = [
   { href: '/advisor/providers', label: 'Providers' },
   { href: '/advisor/report-templates', label: 'Report Templates' },
   { href: '/advisor/settings/email', label: 'Email Sync' },
+  { href: '/advisor/settings/profile', label: 'My Profile' },
 ];
 
 const RESEARCH_LINKS = [

@@ -55,6 +55,7 @@ import { ClientActionModule } from './services/client-action/client-action.modul
 import { EmailIngestionModule } from './services/email-ingestion/email-ingestion.module';
 import { CgtIntelligenceModule } from './services/cgt-intelligence/cgt-intelligence.module';
 import { CallSessionModule } from './services/call-session/call-session.module';
+import { TelephonyModule } from './services/telephony/telephony.module';
 
 import { AiModule } from './ai/ai.module';
 
@@ -113,6 +114,7 @@ import { AiModule } from './ai/ai.module';
     EmailIngestionModule,
     CgtIntelligenceModule,
     CallSessionModule,
+    TelephonyModule,
 
     AiModule,
   ],
