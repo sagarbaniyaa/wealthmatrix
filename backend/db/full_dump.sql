@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict C9A7i6LWN7pWG3USwyzNSoXl6j8WfMh8dNSfi6zfhl7CXQ9b6kvT9t1AoafLdPd
+\restrict 6sFk75bQWndKyzohBeHUuWU1HiCJMtPB6RU6TKs1MNRA0JzsbWoMHpIPWS2SdNC
 
 -- Dumped from database version 18.6
 -- Dumped by pg_dump version 18.6
@@ -227,6 +227,7 @@ CREATE TABLE public.account (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     policy_number text,
+    tax_wrapper text,
     CONSTRAINT chk_account_owner_exactly_one CHECK (((((owner_person_id IS NOT NULL))::integer + ((owner_entity_id IS NOT NULL))::integer) = 1))
 );
 
@@ -333,6 +334,25 @@ CREATE TABLE public.audit_log (
 );
 
 ALTER TABLE ONLY public.audit_log FORCE ROW LEVEL SECURITY;
+
+
+--
+-- Name: cgt_analysis; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.cgt_analysis (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    firm_id uuid NOT NULL,
+    household_id uuid NOT NULL,
+    as_of_date date NOT NULL,
+    per_person jsonb DEFAULT '[]'::jsonb NOT NULL,
+    recommendations jsonb DEFAULT '[]'::jsonb NOT NULL,
+    gaps jsonb DEFAULT '[]'::jsonb NOT NULL,
+    created_by uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE ONLY public.cgt_analysis FORCE ROW LEVEL SECURITY;
 
 
 --
@@ -1070,9 +1090,9 @@ CREATE VIEW public.v_effective_ownership_today AS
 -- Data for Name: account; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.account (id, firm_id, owner_person_id, owner_entity_id, account_type, provider, currency_id, is_active, created_at, updated_at, policy_number) FROM stdin;
-ef9f2608-21cf-4bfc-bac6-f12680798af0	524e600b-d62d-469d-b697-22ced0fbcc07	\N	a84e17c4-16a0-4b63-b19a-1f42176675d7	bank	Barclays Corporate	e9feca71-ef57-41df-ab3a-7e8cd3c2211d	t	2026-08-26 16:26:55.770432+01	2026-08-26 16:26:55.770432+01	\N
-22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc	524e600b-d62d-469d-b697-22ced0fbcc07	ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c	\N	investment	Coutts	e9feca71-ef57-41df-ab3a-7e8cd3c2211d	t	2026-08-26 16:26:55.770432+01	2026-08-26 16:26:55.770432+01	\N
+COPY public.account (id, firm_id, owner_person_id, owner_entity_id, account_type, provider, currency_id, is_active, created_at, updated_at, policy_number, tax_wrapper) FROM stdin;
+ef9f2608-21cf-4bfc-bac6-f12680798af0	524e600b-d62d-469d-b697-22ced0fbcc07	\N	a84e17c4-16a0-4b63-b19a-1f42176675d7	bank	Barclays Corporate	e9feca71-ef57-41df-ab3a-7e8cd3c2211d	t	2026-08-26 16:26:55.770432+01	2026-08-26 16:26:55.770432+01	\N	\N
+22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc	524e600b-d62d-469d-b697-22ced0fbcc07	ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c	\N	investment	Coutts	e9feca71-ef57-41df-ab3a-7e8cd3c2211d	t	2026-08-26 16:26:55.770432+01	2026-09-03 09:59:38.621988+01	\N	\N
 \.
 
 
@@ -1192,6 +1212,7 @@ fb7104fa-c00e-4976-b137-3145d6940221	524e600b-d62d-469d-b697-22ced0fbcc07	fund	d
 5942c12a-72c9-4eb6-8dc4-d193291f8695	524e600b-d62d-469d-b697-22ced0fbcc07	fund	30d8a47e-98cf-4df5-97a1-f31baeeeb409	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "30d8a47e-98cf-4df5-97a1-f31baeeeb409", "aum": 1750000000.00, "ocf": 0.0082, "isin": "GB00DEM0NA06", "name": "WealthMatrix Demo North America Equity", "sedol": "DEM0NA6", "sector": "IA North America", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "manager": "M. Delgado (Demo)", "esg_score": 59.00, "yield_pct": 1.1000, "created_at": "2026-08-28T10:02:04.05715+01:00", "updated_at": "2026-08-28T10:02:04.05715+01:00", "asset_class": "equity", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "data_source": "demo_seed", "description": "Demonstration US/Canada equity fund. Not a real fund.", "risk_rating": 5, "inception_date": "2013-04-12", "volatility_pct": 15.6000, "max_drawdown_pct": 24.0000, "manager_tenure_years": 5.40}	2026-08-28 10:02:04.05715+01
 b5c01c3c-3cbd-431a-ab8f-31604c87f12a	524e600b-d62d-469d-b697-22ced0fbcc07	fund	9bb9b764-3bd9-409a-93b6-4926eaed82c4	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "9bb9b764-3bd9-409a-93b6-4926eaed82c4", "aum": 540000000.00, "ocf": 0.0095, "isin": "GB00DEM0EM07", "name": "WealthMatrix Demo Emerging Markets Equity", "sedol": "DEM0EM7", "sector": "IA Global Emerging Markets", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "manager": "A. Osei (Demo)", "esg_score": 52.00, "yield_pct": 2.6000, "created_at": "2026-08-28T10:02:04.05715+01:00", "updated_at": "2026-08-28T10:02:04.05715+01:00", "asset_class": "equity", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "data_source": "demo_seed", "description": "Demonstration emerging markets equity fund. Not a real fund.", "risk_rating": 6, "inception_date": "2014-02-18", "volatility_pct": 19.8000, "max_drawdown_pct": 31.4000, "manager_tenure_years": 4.90}	2026-08-28 10:02:04.05715+01
 cd607eeb-0ec1-479c-b40e-e8895e9518d1	524e600b-d62d-469d-b697-22ced0fbcc07	fund	4e3b2703-d183-4aaf-ab73-1d817c7780c8	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "4e3b2703-d183-4aaf-ab73-1d817c7780c8", "aum": 720000000.00, "ocf": 0.0110, "isin": "GB00DEM0PR08", "name": "WealthMatrix Demo UK Direct Property", "sedol": "DEM0PR8", "sector": "IA UK Direct Property", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "manager": "C. Wren (Demo)", "esg_score": 48.00, "yield_pct": 3.8000, "created_at": "2026-08-28T10:02:04.05715+01:00", "updated_at": "2026-08-28T10:02:04.05715+01:00", "asset_class": "property", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "data_source": "demo_seed", "description": "Demonstration direct UK commercial property fund. Not a real fund.", "risk_rating": 4, "inception_date": "2007-05-30", "volatility_pct": 7.2000, "max_drawdown_pct": 12.8000, "manager_tenure_years": 8.60}	2026-08-28 10:02:04.05715+01
+fd0cf6f9-53cb-4be2-8267-d289e2eb62ee	524e600b-d62d-469d-b697-22ced0fbcc07	transaction	7838e769-f54d-4d4e-bed7-d3254b3e4697	DELETE	\N	{"id": "7838e769-f54d-4d4e-bed7-d3254b3e4697", "amount": 1800000.00, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "asset_id": "fb5cad1f-b9fd-4b55-9884-a17867f91cf4", "quantity": 1.00000000, "account_id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "created_at": "2026-09-03T09:59:12.018118+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "description": "Test BUY for CGT verification", "external_ref": null, "transaction_date": "2020-01-01", "transaction_type": "buy"}	\N	2026-09-03 09:59:38.621988+01
 1fc81943-de76-4ee7-87c6-015018a2103d	524e600b-d62d-469d-b697-22ced0fbcc07	fund	b967e44c-194c-4fe5-a6cf-ab63df7f8735	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "b967e44c-194c-4fe5-a6cf-ab63df7f8735", "aum": 410000000.00, "ocf": 0.0089, "isin": "GB00DEM0AR09", "name": "WealthMatrix Demo Targeted Absolute Return", "sedol": "DEM0AR9", "sector": "IA Targeted Absolute Return", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "manager": "L. Bianchi (Demo)", "esg_score": 57.00, "yield_pct": 1.5000, "created_at": "2026-08-28T10:02:04.05715+01:00", "updated_at": "2026-08-28T10:02:04.05715+01:00", "asset_class": "alternative", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "data_source": "demo_seed", "description": "Demonstration absolute-return fund. Not a real fund.", "risk_rating": 3, "inception_date": "2016-08-01", "volatility_pct": 5.9000, "max_drawdown_pct": 8.4000, "manager_tenure_years": 6.00}	2026-08-28 10:02:04.05715+01
 07fa95b3-10cb-4c3b-8e1d-98bb1311fa67	524e600b-d62d-469d-b697-22ced0fbcc07	fund	c40064b5-1e60-4fd3-a626-45fce75f3330	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "c40064b5-1e60-4fd3-a626-45fce75f3330", "aum": 850000000.00, "ocf": 0.0085, "isin": "GB00WMD01MO0", "name": "WealthMatrix Demo UK Equity Growth", "sedol": "WMD01MO", "sector": "IA UK All Companies", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "manager": "J. Alderton (Demo)", "esg_score": 68.00, "yield_pct": 1.8000, "created_at": "2026-08-28T10:03:21.095472+01:00", "updated_at": "2026-08-28T10:03:21.095472+01:00", "asset_class": "equity", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "data_source": "demo_seed", "description": "Demonstration fund tracking UK large/mid-cap growth names. Not a real fund.", "risk_rating": 5, "inception_date": "2012-03-01", "volatility_pct": 14.2000, "max_drawdown_pct": 22.5000, "manager_tenure_years": 6.50}	2026-08-28 10:03:21.095472+01
 3cecb358-3f11-4ebb-9fc7-68af896ca94a	524e600b-d62d-469d-b697-22ced0fbcc07	fund	08c25b5f-3ee5-492c-8bea-bcb6820b3bd4	INSERT	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	\N	{"id": "08c25b5f-3ee5-492c-8bea-bcb6820b3bd4", "aum": 1420000000.00, "ocf": 0.0079, "isin": "GB00WMD02MO0", "name": "WealthMatrix Demo Global Equity Income", "sedol": "WMD02MO", "sector": "IA Global Equity Income", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "manager": "R. Okafor (Demo)", "esg_score": 74.00, "yield_pct": 3.2000, "created_at": "2026-08-28T10:03:21.095472+01:00", "updated_at": "2026-08-28T10:03:21.095472+01:00", "asset_class": "equity", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "data_source": "demo_seed", "description": "Demonstration global equity income fund. Not a real fund.", "risk_rating": 4, "inception_date": "2009-11-15", "volatility_pct": 11.8000, "max_drawdown_pct": 18.1000, "manager_tenure_years": 9.20}	2026-08-28 10:03:21.095472+01
@@ -1324,6 +1345,17 @@ cad744a1-9c47-4f7b-a91e-f04bc4b0d825	524e600b-d62d-469d-b697-22ced0fbcc07	househ
 273e2c52-bdc4-4abc-bfba-c2f10cc1c15a	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	c6175042-18e6-457e-917f-ba4b727c694f	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": null}	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	2026-09-02 17:39:41.769355+01
 79a6cec6-b463-49f2-90dd-44f02ebd5de2	524e600b-d62d-469d-b697-22ced0fbcc07	charge_projection	c6175042-18e6-457e-917f-ba4b727c694f	DELETE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "c6175042-18e6-457e-917f-ba4b727c694f", "name": null, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "results": {"series": [{"year": 0, "newValue": 180000, "oldValue": 180000}, {"year": 1, "newValue": 188190, "oldValue": 186840}, {"year": 2, "newValue": 196752.65, "oldValue": 193939.92}, {"year": 3, "newValue": 205704.89, "oldValue": 201309.64}, {"year": 4, "newValue": 215064.46, "oldValue": 208959.4}, {"year": 5, "newValue": 224849.9, "oldValue": 216899.86}, {"year": 6, "newValue": 235080.57, "oldValue": 225142.06}, {"year": 7, "newValue": 245776.73, "oldValue": 233697.45}, {"year": 8, "newValue": 256959.57, "oldValue": 242577.96}, {"year": 9, "newValue": 268651.23, "oldValue": 251795.92}, {"year": 10, "newValue": 280874.86, "oldValue": 261364.16}], "difference": 19510.7, "differencePct": 7.46, "finalNewValue": 280874.86, "finalOldValue": 261364.16, "startingNewValue": 180000}, "created_at": "2026-09-02T17:39:41.769355+01:00", "created_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "updated_at": "2026-09-02T17:39:41.769355+01:00", "assumptions": {"projectionYears": 10, "grossGrowthRatePct": 5}, "ai_narrative": null, "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a", "new_arrangement": {"name": "Fidelity", "initialChargePct": 0, "ongoingChargePct": 0.45}, "old_arrangement": {"name": "Aviva", "currentValue": 180000, "exitPenaltyPct": 0, "ongoingChargePct": 1.2}, "ai_narrative_error": "Claude API rejected the request — check billing/credits are set up on your Anthropic account."}	\N	2026-09-02 17:39:52.757887+01
 038d49fd-a2a9-4e0f-9e50-5d35578cc6aa	524e600b-d62d-469d-b697-22ced0fbcc07	household_action	93ad753d-3030-478f-b0a2-64bcbfa523c0	DELETE	\N	{"id": "93ad753d-3030-478f-b0a2-64bcbfa523c0", "notes": "Aviva to Fidelity", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "created_at": "2026-09-02T17:39:27.061032+01:00", "action_type": "pension_transfer", "selected_by": "0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2", "household_id": "262061da-d7ca-4b2f-a435-0745d97dca4a"}	\N	2026-09-02 17:39:52.920552+01
+76202763-e44b-4291-9c53-71fdf3eef47e	524e600b-d62d-469d-b697-22ced0fbcc07	account	22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc	UPDATE	0f91bc85-1ac0-4bb4-b49e-6c91d1f873d2	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-08-26T16:26:55.770432+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": null, "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-09-03T09:59:02.349239+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": "GIA", "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	2026-09-03 09:59:02.349239+01
+c5c824ab-6f16-4178-b47b-626afec1d064	524e600b-d62d-469d-b697-22ced0fbcc07	transaction	7838e769-f54d-4d4e-bed7-d3254b3e4697	INSERT	\N	\N	{"id": "7838e769-f54d-4d4e-bed7-d3254b3e4697", "amount": 1800000.00, "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "asset_id": "fb5cad1f-b9fd-4b55-9884-a17867f91cf4", "quantity": 1.00000000, "account_id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "created_at": "2026-09-03T09:59:12.018118+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "description": "Test BUY for CGT verification", "external_ref": null, "transaction_date": "2020-01-01", "transaction_type": "buy"}	2026-09-03 09:59:12.018118+01
+dd95974a-af65-40c7-a842-e385fcc06226	524e600b-d62d-469d-b697-22ced0fbcc07	account	22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc	UPDATE	\N	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-09-03T09:59:02.349239+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": "GIA", "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	{"id": "22f7ae9d-ed51-4cca-97d6-cdf3ba5717fc", "firm_id": "524e600b-d62d-469d-b697-22ced0fbcc07", "provider": "Coutts", "is_active": true, "created_at": "2026-08-26T16:26:55.770432+01:00", "updated_at": "2026-09-03T09:59:38.621988+01:00", "currency_id": "e9feca71-ef57-41df-ab3a-7e8cd3c2211d", "tax_wrapper": null, "account_type": "investment", "policy_number": null, "owner_entity_id": null, "owner_person_id": "ef8b24d9-c2bf-44dd-b9d2-d0ea5593bc9c"}	2026-09-03 09:59:38.621988+01
+\.
+
+
+--
+-- Data for Name: cgt_analysis; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.cgt_analysis (id, firm_id, household_id, as_of_date, per_person, recommendations, gaps, created_by, created_at) FROM stdin;
 \.
 
 
@@ -1768,6 +1800,14 @@ ALTER TABLE ONLY public.audit_log
 
 
 --
+-- Name: cgt_analysis cgt_analysis_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cgt_analysis
+    ADD CONSTRAINT cgt_analysis_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: charge_projection charge_projection_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2157,6 +2197,20 @@ CREATE INDEX idx_audit_log_firm_date ON public.audit_log USING btree (firm_id, c
 --
 
 CREATE INDEX idx_audit_log_table_row ON public.audit_log USING btree (table_name, row_id, changed_at DESC);
+
+
+--
+-- Name: idx_cgt_analysis_firm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_cgt_analysis_firm ON public.cgt_analysis USING btree (firm_id);
+
+
+--
+-- Name: idx_cgt_analysis_household; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_cgt_analysis_household ON public.cgt_analysis USING btree (household_id);
 
 
 --
@@ -2556,6 +2610,13 @@ CREATE TRIGGER trg_audit_account AFTER INSERT OR DELETE OR UPDATE ON public.acco
 --
 
 CREATE TRIGGER trg_audit_asset AFTER INSERT OR DELETE OR UPDATE ON public.asset FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
+
+
+--
+-- Name: cgt_analysis trg_audit_cgt_analysis; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_audit_cgt_analysis AFTER INSERT OR DELETE OR UPDATE ON public.cgt_analysis FOR EACH ROW EXECUTE FUNCTION public.audit_row_change();
 
 
 --
@@ -2995,6 +3056,30 @@ ALTER TABLE ONLY public.asset
 
 ALTER TABLE ONLY public.audit_log
     ADD CONSTRAINT audit_log_changed_by_fkey FOREIGN KEY (changed_by) REFERENCES public.app_user(id);
+
+
+--
+-- Name: cgt_analysis cgt_analysis_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cgt_analysis
+    ADD CONSTRAINT cgt_analysis_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.app_user(id);
+
+
+--
+-- Name: cgt_analysis cgt_analysis_firm_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cgt_analysis
+    ADD CONSTRAINT cgt_analysis_firm_id_fkey FOREIGN KEY (firm_id) REFERENCES public.firm(id) ON DELETE CASCADE;
+
+
+--
+-- Name: cgt_analysis cgt_analysis_household_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.cgt_analysis
+    ADD CONSTRAINT cgt_analysis_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
 
 
 --
@@ -3754,6 +3839,12 @@ ALTER TABLE public.asset ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: cgt_analysis; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.cgt_analysis ENABLE ROW LEVEL SECURITY;
+
+--
 -- Name: charge_projection; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
@@ -3967,6 +4058,13 @@ CREATE POLICY tenant_isolation_asset ON public.asset USING ((firm_id = (NULLIF(c
 --
 
 CREATE POLICY tenant_isolation_audit_log ON public.audit_log USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
+
+
+--
+-- Name: cgt_analysis tenant_isolation_cgt_analysis; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY tenant_isolation_cgt_analysis ON public.cgt_analysis USING ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid)) WITH CHECK ((firm_id = (NULLIF(current_setting('app.current_firm_id'::text, true), ''::text))::uuid));
 
 
 --
@@ -4189,5 +4287,5 @@ ALTER TABLE public.transaction ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict C9A7i6LWN7pWG3USwyzNSoXl6j8WfMh8dNSfi6zfhl7CXQ9b6kvT9t1AoafLdPd
+\unrestrict 6sFk75bQWndKyzohBeHUuWU1HiCJMtPB6RU6TKs1MNRA0JzsbWoMHpIPWS2SdNC
 

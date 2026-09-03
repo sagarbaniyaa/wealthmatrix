@@ -37,3 +37,4 @@ export * from './consumer-duty-review.entity';
 export * from './dfm-recommendation.entity';
 export * from './household-action.entity';
 export * from './adviser-email-connection.entity';
+export * from './cgt-analysis.entity';

@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { AccountType } from '../../common/enums/domain.enums';
+import { AccountType, TaxWrapper } from '../../common/enums/domain.enums';
 
 @Entity('account')
 export class AccountEntity {
@@ -11,6 +11,8 @@ export class AccountEntity {
   @Column({ type: 'varchar', nullable: true }) provider: string | null;
   // Provider Automation Hub — LOA autofill token {{policy_number}}.
   @Column({ name: 'policy_number', type: 'varchar', nullable: true }) policyNumber: string | null;
+  // CGT & Portfolio Intelligence — nullable on purpose, see migration 014.
+  @Column({ type: 'varchar', name: 'tax_wrapper', nullable: true }) taxWrapper: TaxWrapper | null;
   @Column({ name: 'currency_id' }) currencyId: string;
   @Column({ name: 'is_active', default: true }) isActive: boolean;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;

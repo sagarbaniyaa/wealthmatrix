@@ -43,6 +43,17 @@ export enum TransactionType {
   DISTRIBUTION = 'distribution',
 }
 
+// CGT & Portfolio Intelligence — see migration 014. Determines whether
+// a holding is even in scope for CGT at all before any number is computed.
+export enum TaxWrapper {
+  ISA = 'ISA',                     // CGT-exempt
+  GIA = 'GIA',                     // General Investment Account — CGT applies in full
+  SIPP = 'SIPP',                   // CGT-exempt (income-tax treatment on withdrawal instead)
+  ONSHORE_BOND = 'ONSHORE_BOND',   // chargeable-event gains, NOT CGT — out of this engine's scope
+  OFFSHORE_BOND = 'OFFSHORE_BOND', // chargeable-event gains, NOT CGT — out of this engine's scope
+  OTHER = 'OTHER',                 // treated like GIA (CGT applies) unless known otherwise
+}
+
 export enum ScenarioEventType {
   BUSINESS_SALE = 'business_sale',
   INHERITANCE = 'inheritance',

@@ -171,6 +171,30 @@ is the load-bearing piece of this backend — read
   poller gets a correctly tenant-scoped `EntityManager` despite having
   no HTTP request behind it (it loops every firm via the RLS-exempt
   `firm` table, then opens a proper tenant transaction per firm).
+- `services/cgt-intelligence` — CGT & Portfolio Intelligence. Analyses a
+  household's PERSONALLY-held investment accounts (entity/trust-held
+  assets are out of scope — their CGT treatment is genuinely different
+  and more complex) for unrealised gains, using UK Section 104 pooling
+  (a chronological running weighted-average cost per holding, walked
+  through its `transaction` BUY/SELL history) — same-day/30-day "bed and
+  breakfast" share-matching is NOT implemented, a documented gap, not a
+  silent one. Requires `account.tax_wrapper` to be set (migration 014) —
+  an ISA/SIPP is excluded as CGT-exempt, a bond is excluded as taxed on
+  chargeable-event gains instead, and an UNSET wrapper is excluded too
+  rather than guessed either way, since guessing wrong is worse than
+  flagging the gap. Outputs, per person (the CGT allowance is personal,
+  not household-level): net unrealised gain, remaining annual exempt
+  amount, estimated tax at both current UK rates (basic/higher — it
+  never picks one for you, since that needs a full income-tax
+  computation this platform doesn't attempt) alongside a same-caveat
+  "likely" band estimated from recorded `income` rows, and concrete
+  recommendations (cheapest to sell, already-zero-CGT holdings, the
+  largest embedded gain to avoid disturbing, and how much of this year's
+  allowance is unused). Entirely deterministic arithmetic — see
+  `cgt-rates.constants.ts` for the one place the UK constants
+  (annual exempt amount, rates, higher-rate threshold) live, since
+  those change nearly every tax year. Append-only (`cgt_analysis`,
+  migration 015).
 - `services/dfm-recommendation` — deterministic DFM mandate + fund
   category recommendation engine. Never names a real regulated DFM firm
   (no due-diligence/fee-panel relationship exists to back that) — outputs

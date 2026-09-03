@@ -152,6 +152,8 @@ export interface ClientNote {
   createdAt: string;
 }
 
+export type TaxWrapper = 'ISA' | 'GIA' | 'SIPP' | 'ONSHORE_BOND' | 'OFFSHORE_BOND' | 'OTHER';
+
 export interface Account {
   id: string;
   ownerPersonId: string | null;
@@ -159,6 +161,7 @@ export interface Account {
   accountType: string;
   provider: string | null;
   currencyId: string;
+  taxWrapper: TaxWrapper | null;
   createdAt: string;
 }
 
@@ -572,6 +575,34 @@ export interface DfmRecommendation {
   gaps: string[];
   aiNarrative: string | null;
   aiNarrativeError: string | null;
+  createdAt: string;
+}
+
+// CGT & Portfolio Intelligence
+
+export interface CgtHoldingDetail {
+  accountId: string; accountProvider: string | null; assetId: string; assetName: string;
+  taxWrapper: string | null; marketValue: number; costBasis: number | null; gain: number | null;
+  dataQualityNote: string | null;
+}
+export interface PerPersonCgtPosition {
+  personId: string; personName: string; annualExemptAmount: number;
+  totalGains: number; totalLosses: number; netGain: number; remainingAllowance: number;
+  estimatedTaxIfRealisedNow: { basicRate: number; higherRate: number };
+  likelyBand: 'basic' | 'higher' | 'unknown';
+  holdings: CgtHoldingDetail[];
+}
+export interface CgtRecommendation {
+  category: 'best_to_sell' | 'zero_cgt' | 'low_cgt' | 'avoid_selling' | 'withdrawal_strategy';
+  personId: string; title: string; detail: string; accountId?: string; assetId?: string;
+}
+export interface CgtAnalysis {
+  id: string;
+  householdId: string;
+  asOfDate: string;
+  perPerson: PerPersonCgtPosition[];
+  recommendations: CgtRecommendation[];
+  gaps: string[];
   createdAt: string;
 }
 

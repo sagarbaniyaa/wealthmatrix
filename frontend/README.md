@@ -508,6 +508,34 @@ inbox and re-uploading attachments by hand.
   while testing).
 - Credentials are encrypted at rest, never shown again after saving.
 
+### CGT & Portfolio Intelligence
+
+**`/advisor/households/[id]/cgt-analysis`** — tag each investment
+account's tax wrapper (ISA/GIA/SIPP/Onshore Bond/Offshore Bond/Other),
+then run the analysis. Real arithmetic, not AI: UK Section 104 pooling
+over each holding's buy/sell transaction history gives a genuine cost
+basis, compared against current market value for the unrealised gain.
+
+- **Per person, not per household** — the CGT annual exempt amount
+  (£3,000) is a personal allowance, so results and recommendations are
+  broken out by household member.
+- **An unset tax wrapper excludes the account, on purpose** — assuming
+  GIA when it's actually an ISA (or the reverse) is a real correctness
+  bug for a platform giving tax guidance, not a rounding error. The
+  gaps list says exactly which accounts need tagging.
+- **Both CGT rates always shown, never one picked for you** — basic
+  (18%) and higher (24%) are both computed; a "likely" band is
+  estimated from recorded income only as a label, never used to hide
+  the other number.
+- **Recommendations are concrete, not generic advice text**: the
+  specific holding cheapest to sell, which ones already carry zero CGT,
+  the one with the largest gain worth leaving alone, and exactly how
+  much of this year's unused allowance could be realised tax-free.
+- **Known, documented gap**: the 30-day "bed and breakfast" share-
+  matching rule (selling and repurchasing the same holding within 30
+  days) isn't implemented — an edge case that would mis-cost a holding
+  if it applies. Flagged in the module's own code comments, not hidden.
+
 ### DFM & Fund Category Recommendation
 
 **`/advisor/households/[id]/dfm-recommendation`** — a deterministic
