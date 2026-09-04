@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Exchanges email/password/firmId for a JWT from the NestJS backend, then
-// stores it as an httpOnly cookie so browser JS never touches the token
-// directly. A parallel non-httpOnly `wm_role` cookie exists purely so
-// middleware.ts can route-gate without decoding the JWT on every request.
+// Same shape as /api/auth/login/route.ts: exchanges signup details for a
+// JWT from the NestJS backend (which creates the firm + first admin
+// user), then stores it the same httpOnly way — a successful signup logs
+// the new admin straight in, no separate login step needed.
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const backendRes = await fetch(`${process.env.BACKEND_API_URL}/auth/login`, {
+  const backendRes = await fetch(`${process.env.BACKEND_API_URL}/auth/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 
   if (!backendRes.ok) {
-    const err = await backendRes.json().catch(() => ({ message: 'Login failed' }));
+    const err = await backendRes.json().catch(() => ({ message: 'Signup failed' }));
     return NextResponse.json(err, { status: backendRes.status });
   }
 
@@ -35,11 +35,8 @@ export async function POST(req: NextRequest) {
     path: '/',
     maxAge: 60 * 60 * 8,
   });
-  // Not a security boundary (the backend re-verifies firmId membership on
-  // every request via the JWT itself) — purely so a returning user's
-  // browser can skip re-typing/pasting a firm reference on their next
-  // login, once more than one firm exists on the platform. 1 year: this
-  // should survive well past the 8h session cookie's expiry.
+  // See login/route.ts's own comment — same non-security-boundary hint,
+  // so THIS browser also skips the firm-reference field on future logins.
   res.cookies.set('wm_firm_hint', user.firmId, {
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',

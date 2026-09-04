@@ -53,6 +53,7 @@ export function ClientProfile({
       ) : (
         <>
           <PersonalDetailsSection person={person} onSaved={() => router.refresh()} />
+          <DataPrivacySection personId={person.id} personName={`${person.firstName} ${person.lastName}`} onErased={() => router.refresh()} />
           <IncomeSection personId={person.id} income={income} currencyOptions={currencyOptions} currencyCode={currencyCode} onChanged={() => router.refresh()} />
           <AssetsSection
             personId={person.id}
@@ -132,6 +133,72 @@ function PersonalDetailsSection({ person, onSaved }: { person: Person; onSaved: 
       <div className="mt-4">
         <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save details'}</Button>
       </div>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------- Data & privacy (GDPR)
+
+function DataPrivacySection({ personId, personName, onErased }: { personId: string; personName: string; onErased: () => void }) {
+  const [exporting, setExporting] = useState(false);
+  const [erasing, setErasing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [erased, setErased] = useState(false);
+
+  async function runExport() {
+    setExporting(true);
+    setError(null);
+    try {
+      const blob = await api.getBlob(`people/${personId}/gdpr-export`);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${personName.replace(/\s+/g, '_')}_data_export.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not export this person\'s data.');
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function runErase() {
+    if (!window.confirm(
+      `Erase ${personName}'s personal data? Name, date of birth, contact details, address and NI ` +
+        'number will be permanently removed. Financial records (accounts, holdings, transactions, ' +
+        'income) are retained under statutory record-keeping obligations. This cannot be undone.',
+    )) {
+      return;
+    }
+    setErasing(true);
+    setError(null);
+    try {
+      await api.post(`people/${personId}/gdpr-erase`);
+      setErased(true);
+      onErased();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not erase this person\'s data.');
+    } finally {
+      setErasing(false);
+    }
+  }
+
+  return (
+    <Card>
+      <p className="mb-1 text-xs uppercase tracking-wide text-ink-300">Data & privacy</p>
+      <p className="mb-4 text-xs text-ink-500">
+        Handles a GDPR subject access request (export everything held) or right-to-erasure request
+        for this person.
+      </p>
+      {erased ? (
+        <p className="text-sm text-ink-300">This person&apos;s personal data has been erased.</p>
+      ) : (
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={runExport} disabled={exporting}>{exporting ? 'Exporting…' : 'Export data (JSON)'}</Button>
+          <Button onClick={runErase} disabled={erasing} variant="danger">{erasing ? 'Erasing…' : 'Erase personal data'}</Button>
+        </div>
+      )}
+      {error && <p className="mt-3 text-sm text-rust-400">{error}</p>}
     </Card>
   );
 }

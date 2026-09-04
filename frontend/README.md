@@ -7,12 +7,24 @@ marketing site, an adviser/admin platform, and a client portal.
 ## Site structure
 
 ```
-/                     Public marketing site (no auth) — hero, services,
-                      features, pricing (placeholder), about, contact.
-/login/advisor        Adviser & admin sign-in (firm reference + email + password)
-/login/advisor/forgot-password   Placeholder — no self-service reset flow yet
+/                     Public marketing site (no auth) — advisor-only front
+                      door: what the platform does and why, sign in / set
+                      up your firm. Client login is a real, working route
+                      (below) — it just isn't marketed here; this site's
+                      audience is the firm evaluating the platform, not
+                      their end clients.
+/login/advisor        Adviser & admin sign-in (email + password, plus a
+                      firm-reference field that only appears once more
+                      than one firm exists on the platform — see
+                      AuthService.resolveFirmId's own comment)
+/login/advisor/signup Self-service: creates a new firm + its first ADMIN
+                      user in one call, then signs them straight in
+/login/advisor/forgot-password   Real token-based reset (was a placeholder)
+/login/advisor/reset-password    Where the emailed reset link lands
 /login/client         Client sign-in — same auth call, friendlier styling
-/login/client/forgot-password    Placeholder, same caveat
+/login/client/forgot-password    Placeholder — client-side self-service
+                      reset wasn't in scope for this pass; same backend
+                      endpoint would work if wired up here too
 
 /advisor/*            Adviser & admin platform (was `/dashboard`, `/households`,
                       `/compliance`, `/reports`)

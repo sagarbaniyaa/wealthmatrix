@@ -76,10 +76,12 @@ The blueprint creates an *empty* Postgres — it has no tables yet.
    This creates every table, RLS policy, trigger, and the demo data
    (advisers, households, funds, providers) in one shot.
 
-## Part D — the two env vars only you can set
+## Part D — the env vars only you can set
 
 Render's free-tier security model won't let a blueprint commit a real
-secret, so two values need setting by hand in the dashboard:
+secret, and two more values genuinely can't be known until both services
+have deployed once each (each one needs the OTHER's URL) — so these need
+setting by hand in the dashboard:
 
 8. **Backend** (`wealthmatrix-backend` → Environment):
    - `ANTHROPIC_API_KEY` — optional. Every AI feature (Wealth Analyst
@@ -90,7 +92,17 @@ secret, so two values need setting by hand in the dashboard:
    - `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`/`SMTP_FROM` — optional, same
      graceful-degradation story for the Provider Hub's "Send to
      Provider" button (it still builds the pack and logs the attempt
-     without these; it just can't actually email it).
+     without these; it just can't actually email it) AND for
+     self-service password reset (`POST /auth/forgot-password` — without
+     these, the reset token is still created, it just can't be emailed;
+     see AuthService's own comment on why that's still correct rather
+     than a rollback).
+   - `FRONTEND_PUBLIC_URL` — **required for password reset to actually
+     work** (not required for the platform to run). Once
+     `wealthmatrix-frontend` has finished deploying, copy its URL (e.g.
+     `https://wealthmatrix-frontend.onrender.com` — no trailing slash)
+     and paste it in here. Save, then trigger **Manual Deploy → Deploy
+     latest commit** on the backend service to pick it up.
 9. **Frontend** (`wealthmatrix-frontend` → Environment):
    - `BACKEND_API_URL` — **required**. Once `wealthmatrix-backend` has
      finished deploying, copy its URL from the top of its Render page

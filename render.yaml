@@ -52,6 +52,13 @@ services:
         sync: false
       - key: FUND_DATA_SOURCE_URL
         sync: false
+      # Set this in the dashboard once the FRONTEND service has deployed
+      # and you have its URL (e.g. https://wealthmatrix-frontend.onrender.com,
+      # no trailing slash) — used to build the link in a password-reset
+      # email. Same chicken-and-egg reasoning as BACKEND_API_URL below,
+      # just in the other direction.
+      - key: FRONTEND_PUBLIC_URL
+        sync: false
 
   - type: web
     name: wealthmatrix-frontend

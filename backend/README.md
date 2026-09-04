@@ -65,10 +65,34 @@ is the load-bearing piece of this backend — read
 - `services/fx-conversion` — **FXConversionService**: point-in-time FX
   conversion (latest rate on/before a date, falls back to the inverse pair),
   per-request memoised.
-- `auth/` — JWT strategy + login. `app_user.password_hash` is a schema
-  addendum not in the original DDL (see `auth.service.ts`) — real
-  deployments will likely swap this for an OIDC/SSO strategy instead of
-  local credentials.
+- `auth/` — JWT strategy, login, self-service firm signup, and
+  password reset. `app_user.password_hash` is a schema addendum not in
+  the original DDL (see `auth.service.ts`) — real deployments will
+  likely swap this for an OIDC/SSO strategy instead of local
+  credentials. `POST /auth/signup` creates a new firm AND its first
+  ADMIN user in one call — before this existed, the only way onto the
+  platform was a manual DB insert. `POST /auth/forgot-password` /
+  `POST /auth/reset-password` implement a real token-based reset
+  (migration 018, `password_reset_token`): only the token's SHA-256
+  hash is stored, single-use, 1-hour expiry, and — this is the part
+  worth being precise about — the response is *identical* whether or
+  not the email actually has an account, so the endpoint can't be used
+  to enumerate who has a login. All four endpoints are tightly
+  rate-limited (signup: 3/min, the other three: 5/min), same reasoning
+  as login's own throttle.
+- `services/gdpr` — **GdprService**, reachable via `GET
+  /people/:id/gdpr-export` and `POST /people/:id/gdpr-erase`: a UK GDPR
+  subject access request (everything held about one person, as JSON)
+  and right-to-erasure request. Erasure is deliberately ANONYMISATION,
+  not deletion — a regulated UK financial-advice firm has its own
+  statutory record-keeping duties that GDPR's own erasure right doesn't
+  override (Article 17(3)(b): compliance with a legal obligation is an
+  explicit carve-out). Name, DOB, contact details, address, and NI
+  number are removed from the person record; accounts/holdings/
+  transactions/income are retained, no longer attributable to
+  identifying information. Export is adviser+admin; erasure is
+  admin-only (a one-way action on client PII) and always leaves a
+  compliance_log entry naming who did it.
 - `ai/` — endpoint contract stubs for `POST /ai/insights/:householdId` and
   `POST /ai/scenario-explain/:scenarioId`, scaffolded so the frontend can
   build against a stable contract before the AI layer (WealthAnalystService)
@@ -429,8 +453,21 @@ full guide to deploying this to Render.
 
 ## Known gaps / next steps
 
-- `app_user` needs a `password_hash` column added (or swap `AuthService`
-  for an OIDC strategy) — not in the base schema by design.
+- **Closed**: password reset (`POST /auth/forgot-password` /
+  `POST /auth/reset-password`, migration 018) and self-service firm
+  signup (`POST /auth/signup`) — see `auth/`'s own writeup above. There
+  is still no way for an EXISTING firm to invite an additional adviser
+  short of an admin creating them directly (no dedicated "invite"
+  endpoint/email) — signup only covers a brand-new firm's first admin.
+- **Closed**: GDPR export/erasure — see `services/gdpr`'s own writeup
+  above. Worth being precise about scope: this covers one person's own
+  record and what's directly attributable to them (accounts, income,
+  fact finds via their household). It does not attempt automated
+  Article-15/17 request LOGGING (a formal register of "who asked, when,
+  what was done") — an adviser runs it manually per request today, the
+  same way the rest of this platform's compliance tooling assumes a
+  human is the one deciding to act, not the one doing the deleting by
+  hand.
 - `WealthConsolidationService` queries per-account in a loop; fine at
   current scale, but the schema's hardening notes (materialized net-worth
   view refreshed nightly) are the intended fix once household counts grow.
