@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+// Per the Fetch spec, a Response with one of these statuses cannot have
+// a body at all (the Response constructor throws if you try).
+const NO_BODY_STATUSES = new Set([204, 205, 304]);
+
 // Generic authenticated proxy: every client-component fetch to
 // /api/proxy/<backend-path> lands here, gets the httpOnly token attached
 // server-side, and is forwarded to the NestJS API. Client JS never sees
@@ -36,6 +40,18 @@ async function proxy(req: NextRequest, path: string[]) {
   }
 
   const backendRes = await fetch(targetUrl, init);
+
+  // 204/205/304 can never carry a response body — the Fetch spec's
+  // Response constructor throws if you try (NextResponse.json() always
+  // attaches one). Every backend route today happens to return 200/201
+  // for a successful mutation, so this hasn't bitten in practice, but
+  // 204 is the standard REST convention for a body-less DELETE and
+  // nothing stops a future endpoint from using it — handle it before
+  // it becomes a 500 the caller can't explain.
+  if (NO_BODY_STATUSES.has(backendRes.status)) {
+    return new NextResponse(null, { status: backendRes.status });
+  }
+
   const contentType = backendRes.headers.get('content-type') ?? '';
 
   if (contentType.includes('application/json')) {

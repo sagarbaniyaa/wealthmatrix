@@ -20,22 +20,32 @@ export async function runInTenantContext<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const queryRunner = dataSource.createQueryRunner();
+  // connect() itself is deliberately OUTSIDE the try/finally below: if it
+  // throws, no connection was ever acquired, so there's nothing to
+  // release. Everything from here on (a transaction that fails to start,
+  // the callback throwing, commit failing) DOES hold an acquired
+  // connection and must release it — a bug this exact shape caught: the
+  // original version called connect()/startTransaction() before the
+  // try/finally entirely, so a connection failure during pollAll's
+  // per-firm loop never released its queryRunner back to the pool.
   await queryRunner.connect();
-  await queryRunner.startTransaction();
   try {
-    await queryRunner.query(
-      `SELECT set_config('app.current_firm_id', $1, true), set_config('app.current_user_id', $2, true)`,
-      [params.firmId, params.userId],
-    );
-    const result = await tenantALS.run(
-      { firmId: params.firmId, userId: params.userId, role: params.role ?? Role.ADMIN, manager: queryRunner.manager },
-      fn,
-    );
-    await queryRunner.commitTransaction();
-    return result;
-  } catch (err) {
-    await queryRunner.rollbackTransaction();
-    throw err;
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.query(
+        `SELECT set_config('app.current_firm_id', $1, true), set_config('app.current_user_id', $2, true)`,
+        [params.firmId, params.userId],
+      );
+      const result = await tenantALS.run(
+        { firmId: params.firmId, userId: params.userId, role: params.role ?? Role.ADMIN, manager: queryRunner.manager },
+        fn,
+      );
+      await queryRunner.commitTransaction();
+      return result;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    }
   } finally {
     await queryRunner.release();
   }

@@ -370,15 +370,26 @@ for changes made *after* the fact. Three things close part of that gap:
   build on any NEW high/critical runtime vulnerability. Before this,
   nothing stopped a broken change from being merged — the tests only
   ran if someone remembered to run them by hand.
-- **`npm audit`** — the two safely-fixable runtime vulnerabilities
-  (`uuid`, `multer`, plus `tar`/`js-yaml` picked up when Swagger was
-  added) are forced to patched versions via `package.json`'s
-  `overrides`, without bumping any `@nestjs/*` package's declared major
-  version. What's left: one moderate `@nestjs/core` advisory whose only
-  fix is Nest v12 (a breaking framework-wide migration, deliberately not
-  rushed here), and ~20 more rooted entirely in `@nestjs/cli`'s own
-  dependency tree — confirmed dev-only build tooling, never present in
-  the deployed `node dist/main.js` runtime.
+- **`npm audit`** — every safely-fixable vulnerability (`uuid`,
+  `multer`, `tar`, `js-yaml`, `glob`, `lodash`, `file-type`, `qs`) is
+  forced to a patched version via `package.json`'s `overrides`, without
+  bumping any `@nestjs/*` package's declared major version.
+  `npm audit --omit=dev --audit-level=high` — the exact gate
+  `backend-ci.yml` runs — passes clean: zero high/critical in the
+  production-reachable dependency tree. Two of these were initially
+  mis-triaged as "dev-tooling only, never in the deployed runtime" and
+  left unfixed — `glob` is ALSO pulled in by `archiver` (used for real,
+  to build the Provider Hub's zip download) and `lodash` by
+  `@nestjs/config`, both genuine production dependencies; re-auditing
+  with `--omit=dev` specifically (rather than reasoning about the
+  dependency tree by eye) caught the mistake. What's left: one moderate
+  `@nestjs/core` advisory whose only fix is Nest v12 (a breaking
+  framework-wide migration, deliberately not rushed here), plus a
+  handful more moderate/low findings needing the same v12 bump
+  (`body-parser`, `file-type`'s own newest major), and the packages
+  rooted entirely in `@nestjs/cli`'s own dependency tree — confirmed
+  dev-only build tooling, never present in the deployed
+  `node dist/main.js` runtime.
 - **Sentry** (`common/sentry.ts`) — optional, free tier, reports only
   genuine unexpected errors (an unhandled exception, or a database error
   code this backend doesn't recognise), never routine 400/403/404s. This

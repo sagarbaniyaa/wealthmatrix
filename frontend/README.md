@@ -709,15 +709,42 @@ one place the visual metaphor is spent, kept quiet everywhere else. The
   control), sees the audit trail and adviser-performance report.
 - **Adviser** — sees only households they're assigned to
   (`adviser_household_assignment`), enforced both in the list endpoint
-  and on direct-ID access (`HouseholdService.ensureAccessible`).
-  Creating a household auto-assigns the creator. *Not yet extended to
-  every household-scoped sub-resource* (scenarios, compliance-log,
-  risk-exposure by household ID still rely on firm-level RLS only — see
-  Known gaps).
+  and on direct-ID access (`HouseholdService.ensureAccessible`), and
+  extended to every resource underneath a household too — scenarios,
+  compliance-log, risk-exposure, entities, accounts, holdings,
+  transactions, income and people all check the caller's actual
+  assignment now, not firm-level RLS alone. Creating a household
+  auto-assigns the creator.
 - **Client** — sees only their own household, resolved from their JWT's
   `personId` (`GET /households/me`), enforced the same way on direct-ID
   access. Never sees other households, compliance findings, or the
   whole-book view.
+
+## Testing
+
+`npm test` runs the Jest suite (`next/jest`, no separate babel/ts-jest
+config to keep in sync with `next.config.js` by hand) — previously
+zero tests existed on the frontend at all. Covers the pieces with real
+logic worth protecting: `lib/format.ts`'s pure formatters,
+`lib/session.ts`'s JWT-decode-without-verify (decode failure returns
+null rather than crashing a Server Component), `lib/api.ts`'s
+client-fetch wrapper (error-message extraction, the 204-returns-
+undefined case, multipart/blob handling), and — the most
+security-relevant one — the `/api/proxy/[...path]` route handler
+itself: 401 with no backend call at all when there's no token,
+correct Bearer header attachment, verbatim multipart passthrough
+(boundary included), and binary passthrough for zip/pdf downloads.
+Writing that last suite caught a real bug before it shipped: the
+route's text/empty-body branch called `NextResponse.json(payload,
+{status})` unconditionally, which throws for a 204/205/304 response —
+the Fetch spec forbids those statuses from carrying a body at all. No
+backend endpoint returns 204 through the proxy today, so this hadn't
+bitten yet, but 204 is the standard REST convention for a body-less
+DELETE and nothing stopped a future endpoint from using it — now
+handled explicitly (`NO_BODY_STATUSES`) before it becomes an
+unexplained 500. A couple of `components/ui/*.test.tsx` files (React
+Testing Library) round it out to prove component rendering is tested
+too, not just `lib/`.
 
 ## Running it
 
@@ -746,6 +773,15 @@ npm run dev
   against the caller's actual household assignment at all — now closed
   via `ensurePersonAccessible`/`ensureAccountAccessible`, and verified
   with an integration test, not just written and trusted.
+- **`npm audit`**: `next` was pinned to 14.2.5, which carried a long
+  list of CVEs (auth bypass, SSRF, cache poisoning, several DoS routes)
+  fixed in later 14.x patches — bumped to `^14.2.35` (a non-breaking
+  patch release, not a major-version migration). What's left: two high
+  advisories in `postcss`, but only inside Next's OWN internally
+  vendored copy (`next/node_modules/postcss`, used by Next's build
+  pipeline, not the app's top-level `postcss@8.5.26`, which is already
+  safe) — the only fix is Next v16, a breaking major upgrade,
+  deliberately not rushed here.
 - **Postgres `NUMERIC` columns return as strings** from the driver
   (`ownershipPct`, `income.amount`, `holding.marketValue` all hit this) —
   every known call site now coerces with `Number(...)`, but a new call
